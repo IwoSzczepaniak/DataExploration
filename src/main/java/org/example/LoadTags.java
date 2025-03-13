@@ -1,21 +1,16 @@
 package org.example;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import javax.print.DocFlavor;
-
 import static org.apache.spark.sql.functions.*;
 
-public class LoadMovies {
+public class LoadTags {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
-                .appName("LoadMovies")
+                .appName("LoadTags")
                 .master("local")
                 .getOrCreate();
         System.out.println("Using Apache Spark v" + spark.version());
@@ -44,62 +39,25 @@ public class LoadMovies {
                 .option("header", "true")
 //                .schema(schema)
                 .option("inferSchema", "true")
-                .load("src/main/resources/movies.csv");
-        // df2
- //
- //         var df2 = df
- //                 .withColumn("rok", year(now()))
- //                 .withColumn("miesiac", month(now()))
- //                 .withColumn("dzien", day(now()))
- //                 .withColumn("godzina", hour(now()));
- //
- //         df2.show(5);
- //         df2.printSchema();
- //
- //         df2.show(20);
- //         System.out.println("Dataframe's schema:");
- //         df2.printSchema();
+                .load("src/main/resources/tags.csv");
 
-        //
+        // df.show(5);
+        // System.out.println("Dataframe's schema:");
+        // df.printSchema();
 
-        var df_transformed = df
-                .withColumn("title2", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 1)) // Extracts the title part
-                .withColumn("year", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 2)) // Extracts the year part
-                .withColumn("genres_array", split(col("genres"), "\\|")) // Extracts the year part
-                .drop("genres")
-                .drop("title") // Drops the original 'title' column
-                .withColumnRenamed("title2", "title"); // Renames 'title2' to 'title'
-//
-//        df_transformed.show();
-//        df_transformed.printSchema();
 
-        var df_exploded = df
-                .withColumn("genres_array", split(col("genres"), "\\|")) // Extracts the year part
-                .drop("genres")
-                .withColumn("genre", explode(col("genres_array"))) // Extracts the year part
-                .drop("genres_array")
-                .withColumn("title2", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 1)) // Extracts the title part
-                .withColumn("year", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 2)) // Extracts the year part
-                .drop("title") // Drops the original 'title' column
-                .withColumnRenamed("title2", "title"); // Renames 'title2' to 'title'
+        var df2 = df.withColumn("datetime", functions.from_unixtime(df.col("timestamp")))
+                .withColumn("year", functions.year(col("datetime")))
+                .withColumn("month", functions.month(col("datetime")))
+                .withColumn("day", functions.dayofmonth(col("datetime")));
 
-//        df_exploded.show();
-//        df_exploded.printSchema();
-        
-//        df_exploded.select("genre").distinct().show(false);
-//
-        var genreList = df_exploded.select("genre").distinct().as(Encoders.STRING()).collectAsList();
-//        for(var s:genreList){
-//            System.out.println(s);
-//        }
+        var df_stats_ym = df2.groupBy("year", "month").count().orderBy("year", "month");
 
-        var df_multigenre = df_transformed;
-        for(var s:genreList){
-//            if(s.equals("(no genres listed)"))continue;
-            df_multigenre=df_multigenre.withColumn(s,array_contains(col("genres_array"),s));
-        }
-        df_multigenre.show();
-//
+        df_stats_ym.show(20);
+        System.out.println("Dataframe's schema:");
+        df_stats_ym.printSchema();
+
+        Helper.plot_stats_ym(df_stats_ym, "Tags", "Count");
 
     }
 }

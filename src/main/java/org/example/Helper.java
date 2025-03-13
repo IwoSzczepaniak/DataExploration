@@ -9,10 +9,23 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.apache.spark.sql.functions.*;
 
 public class Helper {
+    static void plot_histogram(List<Double> x, String title) {
+        Plot plt = Plot.create(PythonConfig.pythonBinPathConfig("python3"));
+        plt.hist().add(x).bins(50);
+        plt.title(title);
+        try {
+            plt.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (PythonExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
     static void plot_stats_ym(Dataset<Row> df, String title, String label) {
         var labels = df.select(concat(col("year"), lit("-"), col("month"))).as(Encoders.STRING()).collectAsList();
         var x = NumpyUtils.arange(0, labels.size() - 1, 1);

@@ -1,0 +1,667 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[T1]{fontenc}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+\title{Eksploracja Danych - zadanie 1}
+\author{Iwo Szczepaniak}
+
+\begin{document}
+\maketitle
+
+\section{4.2 Users}
+W tej sekcji przedstawiono wczytanie i podstawową strukturę danych użytkowników. Dane zawierają informacje o identyfikatorze użytkownika, imieniu, nazwisku oraz adresie email. Wyświetlono pierwsze 20 wierszy oraz schemat danych.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
++------+-----------+----------+--------------------+
+|userId|   foreName|   surName|               email|
++------+-----------+----------+--------------------+
+|     1|     Victor|   Skinner|victor.skinner@mo...|
+|     2|      Boris|    Howard|boris.howard@movi...|
+|     3|    Richard|     Avery|richard.avery@mov...|
+|     4|      Simon|  Metcalfe|simon.metcalfe@mo...|
+|     5|     Robert|     Black|robert.black@movi...|
+|     6|      Pippa|     Lyman|pippa.lyman@movie...|
+|     7|     Gordon|  Paterson|gordon.paterson@m...|
+|     8|     Angela|  Ferguson|angela.ferguson@m...|
+|     9|      Bella|   Thomson|bella.thomson@mov...|
+|    10|    Stephen|  Metcalfe|stephen.metcalfe@...|
+|    11|    Michael|      Ince|michael.ince@movi...|
+|    12|Christopher|    Gibson|christopher.gibso...|
+|    13|       Lisa|     Welch|lisa.welch@movies...|
+|    14|     Sophie|     Allan|sophie.allan@movi...|
+|    15|  Alexander|Rutherford|alexander.rutherf...|
+|    16|      Jason|   Thomson|jason.thomson@mov...|
+|    17|     Adrian|  Ferguson|adrian.ferguson@m...|
+|    18|      Boris|     Kelly|boris.kelly@movie...|
+|    19|  Alexandra|      Bond|alexandra.bond@mo...|
+|    20|      Wanda|     James|wanda.james@movie...|
++------+-----------+----------+--------------------+
+only showing top 20 rows
+
+Dataframe's schema:
+root
+ |-- userId: integer (nullable = true)
+ |-- foreName: string (nullable = true)
+ |-- surName: string (nullable = true)
+ |-- email: string (nullable = true)
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.790 s
+[INFO] Finished at: 2025-03-16T11:17:28+01:00
+[INFO] ------------------------------------------------------------------------
+\end{verbatim}
+
+\section{4.3 Movies}
+
+\subsection{Struktura danych czasowych}
+Przedstawiono dane filmów z dodatkowymi kolumnami czasowymi. Każdy film posiada identyfikator, tytuł, gatunki oraz informacje o dacie i czasie w postaci roku, miesiąca, dnia i godziny.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
++-------+--------------------+--------------------+----+-------+-----+-------+
+|movieId|               title|              genres| rok|miesiac|dzien|godzina|
++-------+--------------------+--------------------+----+-------+-----+-------+
+|      1|    Toy Story (1995)|Adventure|Animati...|2025|      3|   16|     11|
+|      2|      Jumanji (1995)|Adventure|Childre...|2025|      3|   16|     11|
+|      3|Grumpier Old Men ...|      Comedy|Romance|2025|      3|   16|     11|
+|      4|Waiting to Exhale...|Comedy|Drama|Romance|2025|      3|   16|     11|
+|      5|Father of the Bri...|              Comedy|2025|      3|   16|     11|
++-------+--------------------+--------------------+----+-------+-----+-------+
+only showing top 5 rows
+
+root
+ |-- movieId: integer (nullable = true)
+ |-- title: string (nullable = true)
+ |-- genres: string (nullable = true)
+ |-- rok: integer (nullable = false)
+ |-- miesiac: integer (nullable = false)
+ |-- dzien: integer (nullable = false)
+ |-- godzina: integer (nullable = false)
+\end{verbatim}
+
+\subsection{Transformacja danych filmowych}
+Po transformacji danych wyodrębniono rok produkcji filmu oraz przekształcono listę gatunków na tablicę. Pokazano pierwsze 20 filmów w nowej strukturze.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
++-------+--------------------+----+--------------------+
+|movieId|               title|year|        genres_array|
++-------+--------------------+----+--------------------+
+|      1|           Toy Story|1995|[Adventure, Anima...|
+|      2|             Jumanji|1995|[Adventure, Child...|
+|      3|    Grumpier Old Men|1995|   [Comedy, Romance]|
+|      4|   Waiting to Exhale|1995|[Comedy, Drama, R...|
+|      5|Father of the Bri...|1995|            [Comedy]|
+|      6|                Heat|1995|[Action, Crime, T...|
+|      7|             Sabrina|1995|   [Comedy, Romance]|
+|      8|        Tom and Huck|1995|[Adventure, Child...|
+|      9|        Sudden Death|1995|            [Action]|
+|     10|           GoldenEye|1995|[Action, Adventur...|
+|     11|American Presiden...|1995|[Comedy, Drama, R...|
+|     12|Dracula: Dead and...|1995|    [Comedy, Horror]|
+|     13|               Balto|1995|[Adventure, Anima...|
+|     14|               Nixon|1995|             [Drama]|
+|     15|    Cutthroat Island|1995|[Action, Adventur...|
+|     16|              Casino|1995|      [Crime, Drama]|
+|     17|Sense and Sensibi...|1995|    [Drama, Romance]|
+|     18|          Four Rooms|1995|            [Comedy]|
+|     19|Ace Ventura: When...|1995|            [Comedy]|
+|     20|         Money Train|1995|[Action, Comedy, ...|
++-------+--------------------+----+--------------------+
+only showing top 20 rows
+
+root
+ |-- movieId: integer (nullable = true)
+ |-- title: string (nullable = true)
+ |-- year: string (nullable = true)
+ |-- genres_array: array (nullable = true)
+ |    |-- element: string (containsNull = false)
+\end{verbatim}
+
+\subsection{Rozbicie gatunków filmowych}
+Dokonano rozbicia (explode) tablicy gatunków, tworząc osobne wiersze dla każdego gatunku filmu. Pozwala to na łatwiejszą analizę poszczególnych gatunków.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
++-------+---------+--------------------+----+
+|movieId|    genre|               title|year|
++-------+---------+--------------------+----+
+|      1|Adventure|           Toy Story|1995|
+|      1|Animation|           Toy Story|1995|
+|      1| Children|           Toy Story|1995|
+|      1|   Comedy|           Toy Story|1995|
+|      1|  Fantasy|           Toy Story|1995|
+|      2|Adventure|             Jumanji|1995|
+|      2| Children|             Jumanji|1995|
+|      2|  Fantasy|             Jumanji|1995|
+|      3|   Comedy|    Grumpier Old Men|1995|
+|      3|  Romance|    Grumpier Old Men|1995|
+|      4|   Comedy|   Waiting to Exhale|1995|
+|      4|    Drama|   Waiting to Exhale|1995|
+|      4|  Romance|   Waiting to Exhale|1995|
+|      5|   Comedy|Father of the Bri...|1995|
+|      6|   Action|                Heat|1995|
+|      6|    Crime|                Heat|1995|
+|      6| Thriller|                Heat|1995|
+|      7|   Comedy|             Sabrina|1995|
+|      7|  Romance|             Sabrina|1995|
+|      8|Adventure|        Tom and Huck|1995|
++-------+---------+--------------------+----+
+only showing top 20 rows
+
+root
+ |-- movieId: integer (nullable = true)
+ |-- genre: string (nullable = false)
+ |-- title: string (nullable = true)
+ |-- year: string (nullable = true)
+
+\end{verbatim}
+
+\subsection{Reprezentacja binarna gatunków}
+Przekształcono gatunki na format binarny, gdzie każdy gatunek stał się osobną kolumną z wartościami true/false.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
+Crime
+Romance
+Thriller
+Adventure
+Drama
+War
+Documentary
+Fantasy
+Mystery
+Musical
+Animation
+Film-Noir
+(no genres listed)
+IMAX
+Horror
+Western
+Comedy
+Children
+Action
+Sci-Fi
++-------+--------------------+----+--------------------+-----+-------+--------+---------+-----+-----+-----------+-------+-------+-------+---------+---------+------------------+-----+------+-------+------+--------+------+------+
+|movieId|               title|year|        genres_array|Crime|Romance|Thriller|Adventure|Drama|  War|Documentary|Fantasy|Mystery|Musical|Animation|Film-Noir|(no genres listed)| IMAX|Horror|Western|Comedy|Children|Action|Sci-Fi|
++-------+--------------------+----+--------------------+-----+-------+--------+---------+-----+-----+-----------+-------+-------+-------+---------+---------+------------------+-----+------+-------+------+--------+------+------+
+|      1|           Toy Story|1995|[Adventure, Anima...|false|  false|   false|     true|false|false|      false|   true|  false|  false|     true|    false|             false|false| false|  false|  true|    true| false| false|
+|      2|             Jumanji|1995|[Adventure, Child...|false|  false|   false|     true|false|false|      false|   true|  false|  false|    false|    false|             false|false| false|  false| false|    true| false| false|
+|      3|    Grumpier Old Men|1995|   [Comedy, Romance]|false|   true|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|      4|   Waiting to Exhale|1995|[Comedy, Drama, R...|false|   true|   false|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|      5|Father of the Bri...|1995|            [Comedy]|false|  false|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|      6|                Heat|1995|[Action, Crime, T...| true|  false|    true|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false|  true| false|
+|      7|             Sabrina|1995|   [Comedy, Romance]|false|   true|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|      8|        Tom and Huck|1995|[Adventure, Child...|false|  false|   false|     true|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|    true| false| false|
+|      9|        Sudden Death|1995|            [Action]|false|  false|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false|  true| false|
+|     10|           GoldenEye|1995|[Action, Adventur...|false|  false|    true|     true|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false|  true| false|
+|     11|American Presiden...|1995|[Comedy, Drama, R...|false|   true|   false|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|     12|Dracula: Dead and...|1995|    [Comedy, Horror]|false|  false|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false|  true|  false|  true|   false| false| false|
+|     13|               Balto|1995|[Adventure, Anima...|false|  false|   false|     true|false|false|      false|  false|  false|  false|     true|    false|             false|false| false|  false| false|    true| false| false|
+|     14|               Nixon|1995|             [Drama]|false|  false|   false|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false| false| false|
+|     15|    Cutthroat Island|1995|[Action, Adventur...|false|   true|   false|     true|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false|  true| false|
+|     16|              Casino|1995|      [Crime, Drama]| true|  false|   false|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false| false| false|
+|     17|Sense and Sensibi...|1995|    [Drama, Romance]|false|   true|   false|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false| false|   false| false| false|
+|     18|          Four Rooms|1995|            [Comedy]|false|  false|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|     19|Ace Ventura: When...|1995|            [Comedy]|false|  false|   false|    false|false|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false| false| false|
+|     20|         Money Train|1995|[Action, Comedy, ...| true|  false|    true|    false| true|false|      false|  false|  false|  false|    false|    false|             false|false| false|  false|  true|   false|  true| false|
++-------+--------------------+----+--------------------+-----+-------+--------+---------+-----+-----+-----------+-------+-------+-------+---------+---------+------------------+-----+------+-------+------+--------+------+------+
+only showing top 20 rows
+\end{verbatim}
+
+\section{4.4 Ratings}
+Analiza ocen filmów w czasie. Przedstawiono liczbę ocen w poszczególnych miesiącach i latach.
+
+\begin{verbatim}
+Using Apache Spark v3.5.0
++----+-----+-----+
+|year|month|count|
++----+-----+-----+
+|1996|    3|   58|
+|1996|    4|  165|
+|1996|    5|  832|
+|1996|    6|  883|
+|1996|    7|  489|
+|1996|    8| 1010|
+|1996|    9|  384|
+|1996|   10|  935|
+|1996|   11|  978|
+|1996|   12|  306|
+|1997|    1|  250|
+|1997|    2|  323|
+|1997|    3|  398|
+|1997|    4|  219|
+|1997|    5|  303|
+|1997|    6|   84|
+|1997|    7|   70|
+|1997|    9|  236|
+|1997|   10|    1|
+|1997|   11|    4|
++----+-----+-----+
+only showing top 20 rows
+
+Dataframe's schema:
+root
+ |-- year: integer (nullable = true)
+ |-- month: integer (nullable = true)
+ |-- count: long (nullable = false)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{ratings.png}
+    \caption{Rozkład liczby ocen w czasie}
+    \label{fig:ratings_distribution}
+\end{figure}
+
+\section{4.5 Tags}
+\subsection{Wczytanie danych o tagach}
+\begin{verbatim}
+Using Apache Spark v3.5.0
++------+-------+---------------+----------+-------------------+----+-----+---+
+|userId|movieId|            tag| timestamp|           datetime|year|month|day|
++------+-------+---------------+----------+-------------------+----+-----+---+
+|     2|  60756|          funny|1445714994|2015-10-24 21:29:54|2015|   10| 24|
+|     2|  60756|Highly quotable|1445714996|2015-10-24 21:29:56|2015|   10| 24|
+|     2|  60756|   will ferrell|1445714992|2015-10-24 21:29:52|2015|   10| 24|
+|     2|  89774|   Boxing story|1445715207|2015-10-24 21:33:27|2015|   10| 24|
+|     2|  89774|            MMA|1445715200|2015-10-24 21:33:20|2015|   10| 24|
++------+-------+---------------+----------+-------------------+----+-----+---+
+only showing top 5 rows
+
+Dataframe's schema:
+root
+ |-- userId: integer (nullable = true)
+ |-- movieId: integer (nullable = true)
+ |-- tag: string (nullable = true)
+ |-- timestamp: integer (nullable = true)
+\end{verbatim}
+
+\subsection{Analiza liczby tagów w czasie}
+
+\begin{verbatim}
+    +----+-----+-----+
+|year|month|count|
++----+-----+-----+
+|2006|    1| 1462|
+|2006|    2|   39|
+|2006|    3|   13|
+|2006|    4|    7|
+|2006|    6|    1|
+|2006|    8|    1|
+|2006|   10|    9|
+|2006|   11|    1|
+|2007|    1|    1|
+|2007|    2|    1|
+|2007|    3|    2|
+|2007|    4|    4|
+|2007|    5|    1|
+|2007|    8|   31|
+|2007|    9|    6|
+|2008|    1|    2|
+|2008|    9|    2|
+|2008|   11|    1|
+|2008|   12|    4|
+|2009|    2|    7|
++----+-----+-----+
+only showing top 20 rows
+
+Dataframe's schema:
+root
+ |-- year: integer (nullable = true)
+ |-- month: integer (nullable = true)
+ |-- count: long (nullable = false)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{tags.png}
+    \caption{Liczba tagów w kolejnych miesiącach}
+    \label{fig:enter-label}
+\end{figure}
+
+\section{4.6 Join MoviesRatings}
+
+\begin{verbatim}
+    +--------------------+----------+------------------+----------+----------+
+|               title|min_rating|        avg_rating|max_rating|rating_cnt|
++--------------------+----------+------------------+----------+----------+
+|        Forrest Gump|       0.5| 4.164133738601824|       5.0|       329|
+|Shawshank Redempt...|       1.0| 4.429022082018927|       5.0|       317|
+|        Pulp Fiction|       0.5| 4.197068403908795|       5.0|       307|
+|Silence of the La...|       0.5| 4.161290322580645|       5.0|       279|
+|         Matrix, The|       0.5| 4.192446043165468|       5.0|       278|
+|Star Wars: Episod...|       0.5| 4.231075697211155|       5.0|       251|
+|       Jurassic Park|       0.5|              3.75|       5.0|       238|
+|          Braveheart|       0.5| 4.031645569620253|       5.0|       237|
+|Terminator 2: Jud...|       0.5| 3.970982142857143|       5.0|       224|
+|    Schindler's List|       0.5|             4.225|       5.0|       220|
+|          Fight Club|       0.5| 4.272935779816514|       5.0|       218|
+|           Toy Story|       0.5|3.9209302325581397|       5.0|       215|
+|Star Wars: Episod...|       0.5|4.2156398104265405|       5.0|       211|
+|     American Beauty|       0.5| 4.056372549019608|       5.0|       204|
+| Usual Suspects, The|       1.0| 4.237745098039215|       5.0|       204|
+|Seven (a.k.a. Se7en)|       0.5|3.9753694581280787|       5.0|       203|
+|Independence Day ...|       0.5|3.4455445544554455|       5.0|       202|
+|           Apollo 13|       1.0| 3.845771144278607|       5.0|       201|
+|Raiders of the Lo...|       0.5|            4.2075|       5.0|       200|
+|Lord of the Rings...|       0.5| 4.106060606060606|       5.0|       198|
++--------------------+----------+------------------+----------+----------+
+only showing top 20 rows
+
+Dataframe's schema:
+root
+ |-- title: string (nullable = true)
+ |-- min_rating: double (nullable = true)
+ |-- avg_rating: double (nullable = true)
+ |-- max_rating: double (nullable = true)
+ |-- rating_cnt: long (nullable = false)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{joinMoviesRatings_avgRating.png}
+    \caption{Rozkład średnich ocen filmów}
+    \label{fig:movies_ratings_avg}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{JoinMoviesRatings_pred1.png}
+    \caption{Oceny filmów - predykat 1}
+    \label{fig:movies_ratings_pred1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{JoinMoviesRatings_pred2.png}
+    \caption{Oceny filmów - predykat 2}
+    \label{fig:movies_ratings_pred2}
+\end{figure}
+
+\subsection{Przez jaki czas od produkcji filmu pojawiały się oceny?}
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\linewidth]{JoinMoviesRatingsExploaded_v1.png}
+        \caption{Rozkład ocen przed filtracją danych}
+        \label{fig:ratings_time_distribution_v1}
+\end{figure}
+
+Rozkład liczby ocen względem lat od premiery filmu.
+
+\begin{verbatim}
+    +----------------------+-----+
+|release_to_rating_year|count|
++----------------------+-----+
+|                  NULL|   29|
+|                  -1.0|    3|
+|                   0.0|11066|
+|                   1.0|26288|
+|                   2.0|20004|
+|                   3.0|15430|
+|                   4.0|13257|
+|                   5.0|12518|
+|                   6.0|12044|
+|                   7.0|10938|
+|                   8.0|10468|
+|                   9.0| 9495|
+|                  10.0| 9388|
+|                  11.0| 9384|
+|                  12.0| 9141|
+|                  13.0| 8721|
+|                  14.0| 8393|
+|                  15.0| 7584|
+|                  16.0| 6743|
+|                  17.0| 5842|
++----------------------+-----+
+only showing top 20 rows
+
++----------------------+-----+
+|release_to_rating_year|count|
++----------------------+-----+
+|                  NULL|   29|
+|                  -1.0|    3|
++----------------------+-----+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{JoinMoviesRatingsExploaded_v2.png}
+    \caption{Rozkład ocen po filtracji danych}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\section{4.7 Join MoviesRatingsGenres}
+\begin{verbatim}
+Using Apache Spark v3.5.0
++-------+---------+----------------+----+------+------+-------------------+
+|movieId|    genre|           title|year|userId|rating|           datetime|
++-------+---------+----------------+----+------+------+-------------------+
+|      1|  Fantasy|       Toy Story|1995|     1|   4.0|2000-07-30 20:45:03|
+|      1|   Comedy|       Toy Story|1995|     1|   4.0|2000-07-30 20:45:03|
+|      1| Children|       Toy Story|1995|     1|   4.0|2000-07-30 20:45:03|
+|      1|Animation|       Toy Story|1995|     1|   4.0|2000-07-30 20:45:03|
+|      1|Adventure|       Toy Story|1995|     1|   4.0|2000-07-30 20:45:03|
+|      3|  Romance|Grumpier Old Men|1995|     1|   4.0|2000-07-30 20:20:47|
+|      3|   Comedy|Grumpier Old Men|1995|     1|   4.0|2000-07-30 20:20:47|
+|      6| Thriller|            Heat|1995|     1|   4.0|2000-07-30 20:37:04|
+|      6|    Crime|            Heat|1995|     1|   4.0|2000-07-30 20:37:04|
+|      6|   Action|            Heat|1995|     1|   4.0|2000-07-30 20:37:04|
++-------+---------+----------------+----+------+------+-------------------+
+only showing top 10 rows
+
+Dataframe's schema:
+root
+ |-- movieId: integer (nullable = true)
+ |-- genre: string (nullable = false)
+ |-- title: string (nullable = true)
+ |-- year: string (nullable = true)
+ |-- userId: integer (nullable = true)
+ |-- rating: double (nullable = true)
+ |-- datetime: string (nullable = true)
+\end{verbatim}
+
+Poniżej przedstawiono podstawowe statystyki dla każdego gatunku, w tym minimalną, średnią i maksymalną ocenę oraz liczbę ocen.
+Widać znaczące różnice zarówno w popularności gatunków (liczbie ocen), jak i w średnich ocenach.
+
+\begin{verbatim} 
+Genre statistics:
++------------------+----------+------------------+----------+----------+
+|             genre|min_rating|        avg_rating|max_rating|rating_cnt|
++------------------+----------+------------------+----------+----------+
+|(no genres listed)|       0.5|3.4893617021276597|       5.0|        47|
+|            Action|       0.5| 3.447984331646809|       5.0|     30635|
+|         Adventure|       0.5|3.5086089151939075|       5.0|     24161|
+|         Animation|       0.5|3.6299370349170004|       5.0|      6988|
+|          Children|       0.5| 3.412956125108601|       5.0|      9208|
+|            Comedy|       0.5|3.3847207640898267|       5.0|     39053|
+|             Crime|       0.5| 3.658293867274144|       5.0|     16681|
+|       Documentary|       0.5| 3.797785069729286|       5.0|      1219|
+|             Drama|       0.5|3.6561844113718758|       5.0|     41928|
+|           Fantasy|       0.5|3.4910005070136894|       5.0|     11834|
+|         Film-Noir|       0.5| 3.920114942528736|       5.0|       870|
+|            Horror|       0.5| 3.258195034974626|       5.0|      7291|
+|              IMAX|       0.5| 3.618335343787696|       5.0|      4145|
+|           Musical|       0.5|3.5636781053649105|       5.0|      4138|
+|           Mystery|       0.5| 3.632460255407871|       5.0|      7674|
+|           Romance|       0.5|3.5065107040388437|       5.0|     18124|
+|            Sci-Fi|       0.5| 3.455721162210752|       5.0|     17243|
+|          Thriller|       0.5|3.4937055799183425|       5.0|     26452|
+|               War|       0.5|   3.8082938876312|       5.0|      4859|
+|           Western|       0.5| 3.583937823834197|       5.0|      1930|
++------------------+----------+------------------+----------+----------+
+\end{verbatim}
+
+Trzy najwyżej oceniane gatunki to Film-Noir (średnia 3.92), filmy wojenne (3.81) oraz dokumentalne (3.80).
+
+\begin{verbatim}
+Top 3 genres by average rating:
++-----------+----------+-----------------+----------+----------+
+|      genre|min_rating|       avg_rating|max_rating|rating_cnt|
++-----------+----------+-----------------+----------+----------+
+|  Film-Noir|       0.5|3.920114942528736|       5.0|       870|
+|        War|       0.5|  3.8082938876312|       5.0|      4859|
+|Documentary|       0.5|3.797785069729286|       5.0|      1219|
++-----------+----------+-----------------+----------+----------+
+\end{verbatim}
+
+Natomiast najwięcej ocen otrzymały filmy z gatunków: Drama (41,928 ocen), Comedy (39,053) oraz Action (30,635).
+
+\begin{verbatim}
+Top 3 genres by number of ratings:
++------+----------+------------------+----------+----------+
+| genre|min_rating|        avg_rating|max_rating|rating_cnt|
++------+----------+------------------+----------+----------+
+| Drama|       0.5|3.6561844113718758|       5.0|     41928|
+|Comedy|       0.5|3.3847207640898267|       5.0|     39053|
+|Action|       0.5| 3.447984331646809|       5.0|     30635|
++------+----------+------------------+----------+----------+
+\end{verbatim}
+
+Średnia ocena dla całego zbioru wynosi około 3.50. Poniżej przedstawiono gatunki, które otrzymały oceny powyżej tej średniej.
+
+\begin{verbatim}
+Średnia ocena dla całego zbioru: 3.501556983616962
+Statystyki gatunków ze średnią oceną powyżej średniej globalnej:
++-----------+----------+------------------+----------+----------+
+|      genre|min_rating|        avg_rating|max_rating|rating_cnt|
++-----------+----------+------------------+----------+----------+
+|  Film-Noir|       0.5| 3.920114942528736|       5.0|       870|
+|        War|       0.5|   3.8082938876312|       5.0|      4859|
+|Documentary|       0.5| 3.797785069729286|       5.0|      1219|
+|      Crime|       0.5| 3.658293867274144|       5.0|     16681|
+|      Drama|       0.5|3.6561844113718758|       5.0|     41928|
+|    Mystery|       0.5| 3.632460255407871|       5.0|      7674|
+|  Animation|       0.5|3.6299370349170004|       5.0|      6988|
+|       IMAX|       0.5| 3.618335343787696|       5.0|      4145|
+|    Western|       0.5| 3.583937823834197|       5.0|      1930|
+|    Musical|       0.5|3.5636781053649105|       5.0|      4138|
+|  Adventure|       0.5|3.5086089151939075|       5.0|     24161|
+|    Romance|       0.5|3.5065107040388437|       5.0|     18124|
++-----------+----------+------------------+----------+----------+
+
++-----------+------------------+-------------+
+|      genre|        avg_rating|count(rating)|
++-----------+------------------+-------------+
+|  Film-Noir| 3.920114942528736|          870|
+|        War|   3.8082938876312|         4859|
+|Documentary| 3.797785069729286|         1219|
+|      Crime| 3.658293867274144|        16681|
+|      Drama|3.6561844113718758|        41928|
+|    Mystery| 3.632460255407871|         7674|
+|  Animation|3.6299370349170004|         6988|
+|       IMAX| 3.618335343787696|         4145|
+|    Western| 3.583937823834197|         1930|
+|    Musical|3.5636781053649105|         4138|
+|  Adventure|3.5086089151939075|        24161|
+|    Romance|3.5065107040388437|        18124|
++-----------+------------------+-------------+
+\end{verbatim}
+
+\section{4.8 Join UsersTags}
+\begin{verbatim}
+Using Apache Spark v3.5.0
++--------------------+--------------------+
+|               email|                tags|
++--------------------+--------------------+
+|amy.mcgrath@movie...|Everything you wa...|
+|faith.ross@movies...|   funny high school|
+|boris.howard@movi...|funny Highly quot...|
+|richard.oliver@mo...|music British Rom...|
+|karen.wilson@movi...|bad Sinbad Comedy...|
+|melanie.abraham@m...| jackie chan kung fu|
+|kimberly.turner@m...|oldie but goodie ...|
+|jessica.morgan@mo...|pixar superhero k...|
+|jack.walsh@movies...|moldy old moving ...|
+|max.grant@movies.com|              gothic|
+|carl.martin@movie...|a clever chef rat...|
+|megan.hughes@movi...|sofia coppola Joh...|
+|diane.jones@movie...|Brad Pitt Bruce W...|
+|andrew.ince@movie...|romantic comedy w...|
+|sean.rampling@mov...|big wave surfing ...|
+|hannah.oliver@mov...|assassin Jean Ren...|
+|owen.terry@movies...|Kevin Costner Pos...|
+|claire.jones@movi...|time travel myste...|
+|lily.randall@movi...|Afghanistan Ameri...|
+|dominic.lyman@mov...|      Notable Nudity|
++--------------------+--------------------+
+only showing top 20 rows
+\end{verbatim}
+
+\begin{verbatim}
+Everything you want is here adventure
+funny high school
+funny Highly quotable will ferrell Boxing story MMA Tom Hardy drugs Leonardo DiCaprio Martin Scorsese
+music British Romans 70mm World War II for katie austere
+bad Sinbad Comedy bad bad seen at the cinema Not Seen good seen more than once classic bad classic bad bad really bad Seann William Scott sci-fi boring remake Great movie Wesley Snipes not seen bad Ben Affleck classic BEST PICTURE classic hilarious steve carell HORRIBLE ACTING interesting
+jackie chan kung fu
+oldie but goodie sci-fi Star Wars
+pixar superhero knights highschool cult boksdrama stiller wapendrama animation sisters
+moldy old moving predictable
+gothic
+...
+\end{verbatim}
+
+\section{4.9 Join UsersRatings}
+Połączenie danych użytkowników z ocenami. Przedstawiono statystyki ocen dla poszczególnych użytkowników, w tym średnią ocenę oraz liczbę wystawionych ocen.
+
+\begin{verbatim}
++--------------------+------------------+-----+
+|               email|        avg_rating|count|
++--------------------+------------------+-----+
+|victoria.dyer@mov...|               5.0|   20|
+|angela.morgan@mov...| 4.869565217391305|   23|
+|natalie.wallace@m...| 4.846153846153846|   26|
+|dorothy.lewis@mov...|4.8076923076923075|   26|
+|liam.short@movies...| 4.735294117647059|   34|
+|wanda.peters@movi...| 4.693333333333333|   75|
+|tracey.short@movi...| 4.672727272727273|   55|
+|madeleine.white@m...| 4.634146341463414|   82|
+|maria.wilkins@mov...| 4.556930693069307|  202|
+|tracey.lambert@mo...| 4.552631578947368|  114|
+|luke.hughes@movie...| 4.548780487804878|   41|
+|gabrielle.fraser@...| 4.546232876712328|  292|
+|adrian.lee@movies...| 4.522222222222222|   45|
+|justin.macdonald@...| 4.511627906976744|   43|
+|james.peake@movie...| 4.476923076923077|  130|
+|anthony.harris@mo...| 4.472972972972973|   37|
+|amanda.walsh@movi...| 4.462765957446808|   94|
+| luke.may@movies.com| 4.462686567164179|   67|
+|sonia.young@movie...| 4.453947368421052|   76|
+|amy.mcgrath@movie...|4.4393939393939394|   33|
++--------------------+------------------+-----+
+only showing top 20 rows
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{noRatingsVsAvgRating.png}
+    \caption{Zależność między liczbą wystawionych ocen a średnią oceną użytkownika}
+    \label{fig:ratings_vs_avg}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{noRatingsVsAvgRatingHist.png}
+    \caption{Histogram rozkładu średnich ocen użytkowników}
+    \label{fig:ratings_histogram}
+\end{figure}
+
+\end{document}

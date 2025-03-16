@@ -100,6 +100,11 @@
                     <arguments>
                         <argument>--add-exports</argument>
                         <argument>java.base/sun.nio.ch=ALL-UNNAMED</argument>
+                        <argument>--add-opens</argument>
+                        <argument>java.base/java.security=ALL-UNNAMED</argument>
+                        <argument>--add-opens</argument>
+                        <argument>java.base/java.util=ALL-UNNAMED</argument>
+                        <argument>-Djava.security.manager=allow</argument>
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>org.example.Main</argument>

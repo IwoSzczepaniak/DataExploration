@@ -1,13 +1,13 @@
 package org.example;
 
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
-
 import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.min;
+import static org.apache.spark.sql.functions.regexp_extract;
 
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions;
 public class JoinMoviesRatings {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
@@ -26,7 +26,11 @@ public class JoinMoviesRatings {
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/movies.csv");
+                .load("src/main/resources/movies.csv")
+                .withColumn("title2", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 1)) // Extracts the title part
+                .withColumn("year", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 2)) // Extracts the year part
+                .drop("title") // Drops the original 'title' column
+                .withColumnRenamed("title2", "title"); // Renames 'title2' to 'title';
 
         var df_mr = df_movies.join(df_ratings, "movieId", "inner");
 

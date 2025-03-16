@@ -76,7 +76,7 @@ public class JoinMoviesRatingsWithExploaded {
 
 
         var df_stats_ym = df_mr.select("release_to_rating_year").as(Encoders.DOUBLE()).sample(false, 0.002).collectAsList();
-        Helper.plot_histogram(df_stats_ym, "release_to_rating_year");
+        Helper.plot_histogram(df_stats_ym, "Rozktad róznicy lat pomiedzy ocena a wydaniem filmu");
 
         
         
@@ -90,6 +90,6 @@ public class JoinMoviesRatingsWithExploaded {
         var df_mr2_histogram = df_mr2.filter("release_to_rating_year!=-1 AND release_to_rating_year IS NOT NULL");
 
         plot_histogram(df_mr2_histogram.select("release_to_rating_year").as(Encoders.DOUBLE()).collectAsList(),
-                df_mr2_histogram.select("count").as(Encoders.DOUBLE()).collectAsList(), "release_to_rating_year");
+                df_mr2_histogram.select("count").as(Encoders.DOUBLE()).collectAsList(), "[PO ZMIANACH] Rozktad róznicy lat pomiedzy ocena a wydaniem filmu");
     }
 }

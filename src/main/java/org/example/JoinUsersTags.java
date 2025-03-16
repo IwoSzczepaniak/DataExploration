@@ -43,8 +43,8 @@ public class JoinUsersTags {
 
         System.out.println("\nLista tagów dla każdego użytkownika:");
         List<Row> tagsList = df_grouped.select("tags").collectAsList();
-        // for (Row row : tagsList) {
-        //     System.out.println(row.getString(0));
-        // }
+        for (Row row : tagsList) {
+            System.out.println(row.getString(0));
+        }
     }
 }

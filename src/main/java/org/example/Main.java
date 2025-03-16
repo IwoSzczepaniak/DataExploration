@@ -2,6 +2,6 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        JoinMoviesRatingsWithExploaded.main(null);
+        JoinMoviesRatingsGenres.main(null);
     }
 }

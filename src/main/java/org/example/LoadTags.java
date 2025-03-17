@@ -37,19 +37,25 @@ public class LoadTags {
         Dataset<Row> df = spark.read()
                 .format("csv")
                 .option("header", "true")
-//                .schema(schema)
+               .schema(schema)
                 .option("inferSchema", "true")
                 .load("src/main/resources/tags.csv");
 
-        // df.show(5);
-        // System.out.println("Dataframe's schema:");
-        // df.printSchema();
+        df.show(5);
+        System.out.println("Dataframe's schema:");
+        df.printSchema();
 
 
         var df2 = df.withColumn("datetime", functions.from_unixtime(df.col("timestamp")))
                 .withColumn("year", functions.year(col("datetime")))
                 .withColumn("month", functions.month(col("datetime")))
                 .withColumn("day", functions.dayofmonth(col("datetime")));
+
+
+        df2.show(5);
+        System.out.println("Dataframe's schema:");
+        df2.printSchema();
+
 
         var df_stats_ym = df2.groupBy("year", "month").count().orderBy("year", "month");
 

@@ -38,10 +38,8 @@ public class JoinUsersTags {
         Dataset<Row> df_grouped = df_ut.groupBy("email")
                 .agg(concat_ws(" ", collect_list("tag")).alias("tags"));
 
-        System.out.println("Zgrupowane tagi po użytkownikach:");
         df_grouped.show();
 
-        System.out.println("\nLista tagów dla każdego użytkownika:");
         List<Row> tagsList = df_grouped.select("tags").collectAsList();
         for (Row row : tagsList) {
             System.out.println(row.getString(0));

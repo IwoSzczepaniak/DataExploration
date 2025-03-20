@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import static org.apache.spark.sql.functions.avg;
 import static org.apache.spark.sql.functions.col;
@@ -66,13 +66,13 @@ public class JoinUsersRatings {
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/users.csv");
+                .load("src/main/resources/lab1/users.csv");
 
         Dataset<Row> df_ratings = spark.read()
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/ratings.csv");
+                .load("src/main/resources/lab1/ratings.csv");
 
         Dataset<Row> df_ur = df_users.join(df_ratings, "userId");
 

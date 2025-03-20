@@ -1,26 +1,28 @@
-package org.example;
+package org.lab1;
 
-import com.github.sh0nk.matplotlib4j.NumpyUtils;
-import com.github.sh0nk.matplotlib4j.Plot;
-import com.github.sh0nk.matplotlib4j.PythonConfig;
-import com.github.sh0nk.matplotlib4j.PythonExecutionException;
-import org.apache.spark.sql.*;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
-import java.io.IOException;
-
-import static org.apache.spark.sql.functions.*;
-
-public class LoadRatings {
+public class LoadUsers {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
-                .appName("LoadRatings")
+                .appName("LoadUsers")
                 .master("local")
                 .getOrCreate();
         System.out.println("Using Apache Spark v" + spark.version());
-
+//
+//        Dataset<Row> df = spark.read()
+//                .format("csv")
+//                .option("header", "true")
+//                .load("src/main/resources/lab1/users.csv");
+//
+//        System.out.println("Excerpt of the dataframe content:");
+//
+//
 
         //
         StructType schema = DataTypes.createStructType(new StructField[]{
@@ -29,15 +31,15 @@ public class LoadRatings {
                         DataTypes.IntegerType,
                         true),
                 DataTypes.createStructField(
-                        "movieId",
+                        "foreName",
                         DataTypes.StringType,
                         false),
                 DataTypes.createStructField(
-                        "rating",
+                        "surName",
                         DataTypes.StringType,
                         false),
                 DataTypes.createStructField(
-                        "timestamp",
+                        "email",
                         DataTypes.StringType,
                         false),});
 
@@ -46,21 +48,11 @@ public class LoadRatings {
                 .option("header", "true")
 //                .schema(schema)
                 .option("inferSchema", "true")
-                .load("src/main/resources/ratings.csv");
+                .load("src/main/resources/lab1/users.csv");
         //
 
-        var df2 = df.withColumn("datetime", functions.from_unixtime(df.col("timestamp")))
-                .withColumn("year", functions.year(col("datetime")))
-                .withColumn("month", functions.month(col("datetime")))
-                .withColumn("day", functions.dayofmonth(col("datetime")));
-
-        var df_stats_ym = df2.groupBy("year", "month").count().orderBy("year", "month");
-
-        df_stats_ym.show(20);
+        df.show(20);
         System.out.println("Dataframe's schema:");
-        df_stats_ym.printSchema();
-
-        Helper.plot_stats_ym(df_stats_ym, "Ratings", "Count");
-
+        df.printSchema();
     }
 }

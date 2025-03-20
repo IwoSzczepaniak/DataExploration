@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.DataTypes;
@@ -39,7 +39,7 @@ public class LoadTags {
                 .option("header", "true")
                .schema(schema)
                 .option("inferSchema", "true")
-                .load("src/main/resources/tags.csv");
+                .load("src/main/resources/lab1/tags.csv");
 
         df.show(5);
         System.out.println("Dataframe's schema:");

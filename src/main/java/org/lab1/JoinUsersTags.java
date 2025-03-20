@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import org.apache.spark.sql.*;
 import static org.apache.spark.sql.functions.*;
@@ -16,13 +16,13 @@ public class JoinUsersTags {
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/users.csv");
+                .load("src/main/resources/lab1/users.csv");
 
         Dataset<Row> df_tags = spark.read()
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/tags.csv");
+                .load("src/main/resources/lab1/tags.csv");
 
         df_users.createOrReplaceTempView("users");
         df_tags.createOrReplaceTempView("tags");

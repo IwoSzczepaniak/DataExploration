@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import org.apache.spark.sql.*;
 
@@ -38,13 +38,13 @@ public class JoinMoviesRatingsWithExploaded {
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/ratings.csv");
+                .load("src/main/resources/lab1/ratings.csv");
         //
         Dataset<Row> df_movies = spark.read()
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/movies.csv")
+                .load("src/main/resources/lab1/movies.csv")
                 .withColumn("genres_array", split(col("genres"), "\\|")) // Extracts the year part
                 .drop("genres")
                 .withColumn("genre", explode(col("genres_array"))) // Extracts the year part

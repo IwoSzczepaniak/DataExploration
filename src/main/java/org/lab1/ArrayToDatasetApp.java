@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;

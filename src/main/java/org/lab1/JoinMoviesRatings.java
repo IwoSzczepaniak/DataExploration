@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.regexp_extract;
@@ -20,13 +20,13 @@ public class JoinMoviesRatings {
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/ratings.csv");
+                .load("src/main/resources/lab1/ratings.csv");
         //
         Dataset<Row> df_movies = spark.read()
                 .format("csv")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .load("src/main/resources/movies.csv")
+                .load("src/main/resources/lab1/movies.csv")
                 .withColumn("title2", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 1)) // Extracts the title part
                 .withColumn("year", regexp_extract(col("title"), "^(.*?)\\s*\\((\\d{4})\\)$", 2)) // Extracts the year part
                 .drop("title") // Drops the original 'title' column

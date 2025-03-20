@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
@@ -44,7 +44,7 @@ public class LoadMovies {
                 .option("header", "true")
 //                .schema(schema)
                 .option("inferSchema", "true")
-                .load("src/main/resources/movies.csv");
+                .load("src/main/resources/lab1/movies.csv");
         // df2
  //
  //         var df2 = df

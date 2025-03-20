@@ -1,4 +1,4 @@
-package org.example;
+package org.lab1;
 
 import com.github.sh0nk.matplotlib4j.NumpyUtils;
 import com.github.sh0nk.matplotlib4j.Plot;

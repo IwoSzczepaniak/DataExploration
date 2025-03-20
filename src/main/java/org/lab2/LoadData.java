@@ -23,7 +23,7 @@ import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 import com.github.sh0nk.matplotlib4j.NumpyUtils;
 
 public class LoadData {
-    static void plotObjectiveHistory(double[] lossHistory) {
+    static void plotObjectiveHistory(double[] lossHistory, String params) {
         List<Double> x = IntStream.range(0, lossHistory.length).mapToDouble(d -> d).boxed().toList();
         List<Double> lossList = Arrays.stream(lossHistory).boxed().toList();
 
@@ -32,7 +32,11 @@ public class LoadData {
             plt.plot().add(x, lossList).label("loss");
             plt.xlabel("Iteration");
             plt.ylabel("Loss");
-            plt.title("Loss history");
+            if (params != null) {
+                plt.title("Loss history " + params);
+            } else {
+                plt.title("Loss history");
+            }
             plt.legend();
             plt.show();
         } catch (IOException | PythonExecutionException e) {
@@ -89,6 +93,42 @@ public class LoadData {
         }
     }
 
+    static void trainAndEvaluateModel(Dataset<Row> vectorData, double regParam, double elasticNetParam,
+            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true) {
+
+        String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);
+
+        // 1.2
+        LinearRegression lr = new LinearRegression()
+                .setMaxIter(10)
+                .setRegParam(0.3)
+                .setElasticNetParam(0.8)
+                .setFeaturesCol("features")
+                .setLabelCol("Y");
+
+        LinearRegressionModel lrModel = lr.fit(vectorData);
+
+        System.out.println("Coefficients: " + lrModel.coefficients());
+        System.out.println("Intercept: " + lrModel.intercept());
+
+        LinearRegressionTrainingSummary trainingSummary = lrModel.summary();
+        System.out.println("numIterations: " + trainingSummary.totalIterations());
+        System.out.println("objectiveHistory: " + Vectors.dense(trainingSummary.objectiveHistory()));
+        trainingSummary.residuals().show(100);
+        System.out.println("MSE: " + trainingSummary.meanSquaredError());
+        System.out.println("RMSE: " + trainingSummary.rootMeanSquaredError());
+        System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
+        System.out.println("r2: " + trainingSummary.r2());
+
+        plotObjectiveHistory(trainingSummary.objectiveHistory(), "" + params);
+
+        // // 1.3
+        // plot(xValues, yValues, lrModel, "Linear regression", null);
+
+        // 1.3 extra
+        plot(xValues, yValues, lrModel, "Linear regression" + params, f_true);
+    }
+
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
                 .appName("Load XY Data")
@@ -114,30 +154,6 @@ public class LoadData {
         vectorData.show(5);
         vectorData.printSchema();
 
-        // 1.2
-        LinearRegression lr = new LinearRegression()
-                .setMaxIter(10)
-                .setRegParam(0.3)
-                .setElasticNetParam(0.8)
-                .setFeaturesCol("features")
-                .setLabelCol("Y");
-
-        LinearRegressionModel lrModel = lr.fit(vectorData);
-
-        System.out.println("Coefficients: " + lrModel.coefficients());
-        System.out.println("Intercept: " + lrModel.intercept());
-
-        LinearRegressionTrainingSummary trainingSummary = lrModel.summary();
-        System.out.println("numIterations: " + trainingSummary.totalIterations());
-        System.out.println("objectiveHistory: " + Vectors.dense(trainingSummary.objectiveHistory()));
-        trainingSummary.residuals().show(100);
-        System.out.println("MSE: " + trainingSummary.meanSquaredError());
-        System.out.println("RMSE: " + trainingSummary.rootMeanSquaredError());
-        System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
-        System.out.println("r2: " + trainingSummary.r2());
-
-        // plotObjectiveHistory(trainingSummary.objectiveHistory());
-
         List<Row> rows = data.collectAsList();
         List<Double> xValues = rows.stream()
                 .map(row -> row.getDouble(0))
@@ -146,12 +162,14 @@ public class LoadData {
                 .map(row -> row.getDouble(1))
                 .collect(Collectors.toList());
 
-        // // 1.3
-        // plot(xValues, yValues, lrModel, "Linear regression", null);
-
-        // 1.3 extra
+        // 1.4
+        double[] regParams = { 0.0, 10.0, 20.0, 50.0, 100.0 };
+        double elasticNetParam = 0.8;
         Function<Double, Double> f_true = x -> 2.5 * x + 1;
-        plot(xValues, yValues, lrModel, "Linear regression", f_true);
+
+        for (double regParam : regParams) {
+            trainAndEvaluateModel(vectorData, regParam, elasticNetParam, xValues, yValues, f_true);
+        }
 
         spark.stop();
     }

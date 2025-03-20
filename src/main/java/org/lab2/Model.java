@@ -22,7 +22,7 @@ import com.github.sh0nk.matplotlib4j.PythonConfig;
 import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 import com.github.sh0nk.matplotlib4j.NumpyUtils;
 
-public class LoadData {
+public class Model {
     static void plotObjectiveHistory(double[] lossHistory, String params) {
         List<Double> x = IntStream.range(0, lossHistory.length).mapToDouble(d -> d).boxed().toList();
         List<Double> lossList = Arrays.stream(lossHistory).boxed().toList();
@@ -93,7 +93,7 @@ public class LoadData {
         }
     }
 
-    static void trainAndEvaluateModel(Dataset<Row> vectorData, double regParam, double elasticNetParam,
+    static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
             List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true) {
 
         String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);
@@ -101,8 +101,8 @@ public class LoadData {
         // 1.2
         LinearRegression lr = new LinearRegression()
                 .setMaxIter(10)
-                .setRegParam(0.3)
-                .setElasticNetParam(0.8)
+                .setRegParam(regParam)
+                .setElasticNetParam(elasticNetParam)
                 .setFeaturesCol("features")
                 .setLabelCol("Y");
 
@@ -120,7 +120,7 @@ public class LoadData {
         System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
         System.out.println("r2: " + trainingSummary.r2());
 
-        plotObjectiveHistory(trainingSummary.objectiveHistory(), "" + params);
+        plotObjectiveHistory(trainingSummary.objectiveHistory(), params);
 
         // // 1.3
         // plot(xValues, yValues, lrModel, "Linear regression", null);
@@ -130,6 +130,7 @@ public class LoadData {
     }
 
     public static void main(String[] args) {
+        var resourceName = args[0];
         SparkSession spark = SparkSession.builder()
                 .appName("Load XY Data")
                 .master("local[*]")
@@ -138,7 +139,7 @@ public class LoadData {
         Dataset<Row> data = spark.read()
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .csv("src/main/resources/lab2/xy-001.csv");
+                .csv("src/main/resources/lab2/" + resourceName);
 
         System.out.println("Oryginalne dane:");
         data.show(5);
@@ -163,13 +164,16 @@ public class LoadData {
                 .collect(Collectors.toList());
 
         // 1.4
-        double[] regParams = { 0.0, 10.0, 20.0, 50.0, 100.0 };
-        double elasticNetParam = 0.8;
-        Function<Double, Double> f_true = x -> 2.5 * x + 1;
+        // double[] regParams = { 0.0, 10.0, 20.0, 50.0, 100.0 };
+        // double elasticNetParam = 0.8;
+        // Function<Double, Double> f_true = x -> 2.5 * x + 1;
 
-        for (double regParam : regParams) {
-            trainAndEvaluateModel(vectorData, regParam, elasticNetParam, xValues, yValues, f_true);
-        }
+        // for (double regParam : regParams) {
+        //     trainAndEvaluateModel(vectorData, regParam, elasticNetParam, xValues, yValues, null);
+        // }
+
+        // 3
+        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null);
 
         spark.stop();
     }

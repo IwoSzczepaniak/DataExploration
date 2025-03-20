@@ -107,7 +107,7 @@
                         <argument>-Djava.security.manager=allow</argument>
                         <argument>-classpath</argument>
                         <classpath />
-                        <argument>org.example.Main</argument>
+                        <argument>org.lab2.Main</argument>
                     </arguments>
                 </configuration>
             </plugin>

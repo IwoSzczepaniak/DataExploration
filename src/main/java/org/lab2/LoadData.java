@@ -1,17 +1,45 @@
 package org.lab2;
 
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.regression.LinearRegression;
+import org.apache.spark.ml.regression.LinearRegressionModel;
+import org.apache.spark.ml.regression.LinearRegressionTrainingSummary;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.ml.linalg.Vectors;
+import com.github.sh0nk.matplotlib4j.Plot;
+import com.github.sh0nk.matplotlib4j.PythonConfig;
+import com.github.sh0nk.matplotlib4j.PythonExecutionException;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.Arrays;
 
 public class LoadData {
+    static void plotObjectiveHistory(double[] lossHistory) {
+        List<Double> x = IntStream.range(0, lossHistory.length).mapToDouble(d -> d).boxed().toList();
+        List<Double> lossList = Arrays.stream(lossHistory).boxed().toList();
+
+        Plot plt = Plot.create(PythonConfig.pythonBinPathConfig("python3"));
+        try {
+            plt.plot().add(x, lossList).label("loss");
+            plt.xlabel("Iteration");
+            plt.ylabel("Loss");
+            plt.title("Loss history");
+            plt.legend();
+            plt.show();
+        } catch (IOException | PythonExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
-                .appName("LoadMovies")
-                .master("local")
+                .appName("Load XY Data")
+                .master("local[*]")
                 .getOrCreate();
-        System.out.println("Using Apache Spark v" + spark.version());
 
         Dataset<Row> data = spark.read()
                 .option("header", "true")
@@ -23,7 +51,7 @@ public class LoadData {
         data.printSchema();
 
         VectorAssembler vectorAssembler = new VectorAssembler()
-                .setInputCols(new String[]{"X"})
+                .setInputCols(new String[] { "X" })
                 .setOutputCol("features");
 
         Dataset<Row> vectorData = vectorAssembler.transform(data);
@@ -31,6 +59,30 @@ public class LoadData {
         System.out.println("\nDane po transformacji:");
         vectorData.show(5);
         vectorData.printSchema();
+
+        // 1.2
+        LinearRegression lr = new LinearRegression()
+                .setMaxIter(10)
+                .setRegParam(0.3)
+                .setElasticNetParam(0.8)
+                .setFeaturesCol("features")
+                .setLabelCol("Y");
+
+        LinearRegressionModel lrModel = lr.fit(vectorData);
+
+        System.out.println("Coefficients: " + lrModel.coefficients());
+        System.out.println("Intercept: " + lrModel.intercept());
+
+        LinearRegressionTrainingSummary trainingSummary = lrModel.summary();
+        System.out.println("numIterations: " + trainingSummary.totalIterations());
+        System.out.println("objectiveHistory: " + Vectors.dense(trainingSummary.objectiveHistory()));
+        trainingSummary.residuals().show(100);
+        System.out.println("MSE: " + trainingSummary.meanSquaredError());
+        System.out.println("RMSE: " + trainingSummary.rootMeanSquaredError());
+        System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
+        System.out.println("r2: " + trainingSummary.r2());
+
+        plotObjectiveHistory(trainingSummary.objectiveHistory());
 
         spark.stop();
     }

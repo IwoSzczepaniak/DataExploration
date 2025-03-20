@@ -1,21 +1,26 @@
 package org.lab2;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.spark.ml.feature.VectorAssembler;
+import org.apache.spark.ml.linalg.DenseVector;
+import org.apache.spark.ml.linalg.Vectors;
 import org.apache.spark.ml.regression.LinearRegression;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.ml.regression.LinearRegressionTrainingSummary;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.ml.linalg.Vectors;
+
 import com.github.sh0nk.matplotlib4j.Plot;
 import com.github.sh0nk.matplotlib4j.PythonConfig;
 import com.github.sh0nk.matplotlib4j.PythonExecutionException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.IntStream;
-import java.util.Arrays;
+import com.github.sh0nk.matplotlib4j.NumpyUtils;
 
 public class LoadData {
     static void plotObjectiveHistory(double[] lossHistory) {
@@ -28,6 +33,55 @@ public class LoadData {
             plt.xlabel("Iteration");
             plt.ylabel("Loss");
             plt.title("Loss history");
+            plt.legend();
+            plt.show();
+        } catch (IOException | PythonExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     *
+     * @param x       - współrzedne x danych
+     * @param y       - współrzedne y danych
+     * @param lrModel - model regresji
+     * @param title   - tytuł do wyswietlenia (może być null)
+     * @param f_true  - funkcja f_true (może być null)
+     */
+    static void plot(List<Double> x, List<Double> y, LinearRegressionModel lrModel, String title,
+            Function<Double, Double> f_true) {
+        Plot plt = Plot.create(PythonConfig.pythonBinPathConfig("python3"));
+        try {
+            plt.plot().add(x, y, ".").label("data");
+
+            double xmin = x.stream().mapToDouble(Double::doubleValue).min().getAsDouble();
+            double xmax = x.stream().mapToDouble(Double::doubleValue).max().getAsDouble();
+            double xdelta = 0.05 * (xmax - xmin);
+
+            List<Double> fx = NumpyUtils.linspace(xmin - xdelta, xmax + xdelta, 100);
+
+            List<Double> fy = fx.stream()
+                    .map(x_val -> {
+                        double[] arr = new double[] { x_val };
+                        return lrModel.predict(new DenseVector(arr));
+                    })
+                    .collect(Collectors.toList());
+
+            plt.plot().add(fx, fy).color("r").label("pred");
+
+            if (f_true != null) {
+                List<Double> fy_true = fx.stream()
+                        .map(f_true::apply)
+                        .collect(Collectors.toList());
+                plt.plot().add(fx, fy_true).color("g").linestyle("--").label("$f_{true}$");
+            }
+
+            if (title != null) {
+                plt.title(title);
+            } else {
+                plt.title("Linear regression");
+            }
+
             plt.legend();
             plt.show();
         } catch (IOException | PythonExecutionException e) {
@@ -82,7 +136,22 @@ public class LoadData {
         System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
         System.out.println("r2: " + trainingSummary.r2());
 
-        plotObjectiveHistory(trainingSummary.objectiveHistory());
+        // plotObjectiveHistory(trainingSummary.objectiveHistory());
+
+        List<Row> rows = data.collectAsList();
+        List<Double> xValues = rows.stream()
+                .map(row -> row.getDouble(0))
+                .collect(Collectors.toList());
+        List<Double> yValues = rows.stream()
+                .map(row -> row.getDouble(1))
+                .collect(Collectors.toList());
+
+        // // 1.3
+        // plot(xValues, yValues, lrModel, "Linear regression", null);
+
+        // 1.3 extra
+        Function<Double, Double> f_true = x -> 2.5 * x + 1;
+        plot(xValues, yValues, lrModel, "Linear regression", f_true);
 
         spark.stop();
     }

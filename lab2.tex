@@ -1,0 +1,544 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[T1]{fontenc}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+\title{Eksploracja Danych - zadanie 2}
+\author{Iwo Szczepaniak}
+
+\begin{document}
+\maketitle
+
+\section{Przetwarzanie zbioru xy-001}
+Dane zostały załadowane i przekształcone przy użyciu VectorAssembler, który konwertuje kolumnę X do formatu wektora cech wymaganego przez algorytm regresji. Kolumna wynikowa została nazwana "features".
+
+\subsection{Ładowanie i przetwarzanie wstępne}
+\begin{verbatim}
++--------+----------+
+|       X|         Y|
++--------+----------+
+|0.411194|-59.938274|
+|0.549662|-72.006761|
+|0.860093|-68.979336|
+| 1.27504|  32.07157|
+|2.202931|-91.531894|
++--------+----------+
+only showing top 5 rows
+
+root
+ |-- X: double (nullable = true)
+ |-- Y: double (nullable = true)
+\end{verbatim}
+
+\subsection{Regresja}
+Wykorzystano algorytm LinearRegression z następującymi parametrami:
+\begin{itemize}
+    \item MaxIter: 10
+    \item RegParam: 0.3
+    \item ElasticNetParam: 0.8
+\end{itemize}
+
+\begin{verbatim}
+Coefficients: [-73.66234946939554]
+Intercept: 635.3543312755129
+numIterations: 2
+objectiveHistory: [0.5000000000000002,0.40546708248417435,0.04089257570641288]
++-------------------+
+|          residuals|
++-------------------+
+| -665.0030891477942|
+|  -666.871697941466|
+| -640.9771961333321|
+| -509.3603192080548|
+| -564.6131520965479|
+|-449.37832961747904|
++-------------------+
+
+MSE: 88011.40099115501
+RMSE: 296.6671552281361
+MAE: 259.7641459358794
+r2: 0.9331616863674084
+\end{verbatim}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{image231.png}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{Wykres funkcji i danych}
+Utworzono funkcję do wizualizacji:
+\begin{itemize}
+    \item punktów danych treningowych
+    \item funkcji regresji
+    \item prawdziwej funkcji ($f_{true}$)
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{image_2.png}
+    \caption{Funkcja rysująca wykresy}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{Wpływ parametrów regularyzacji}
+Przeanalizowano wpływ parametru regularyzacji na wyniki modelu. Poniżej przedstawiono szczegółową analizę dla różnych wartości parametru RegParam.
+
+\subsubsection{RegParam = 0.0 (brak regularyzacji)}
+Model bez regularyzacji osiągnął następujące wyniki:
+\begin{itemize}
+    \item Współczynnik: -74.3271
+    \item Wyraz wolny: 652.8037
+    \item MSE: 87913.0977
+    \item R²: 0.9332
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.46.38.png}
+        \caption{Historia funkcji straty dla RegParam = 0.0}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.46.41.png}
+        \caption{Regresja i punkty dla RegParam = 0.0}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{RegParam = 10.0}
+Przy średniej regularyzacji otrzymano:
+\begin{itemize}
+    \item Współczynnik: -73.6623
+    \item Wyraz wolny: 635.3543
+    \item MSE: 88011.4010
+    \item R²: 0.9332
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.14.png}
+        \caption{Historia funkcji straty dla RegParam = 10.0}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.17.png}
+        \caption{Regresja i punkty dla RegParam = 10.0}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{RegParam = 20.0}
+Przy zwiększonej regularyzacji:
+\begin{itemize}
+    \item Współczynnik: -73.6623
+    \item Wyraz wolny: 635.3543
+    \item MSE: 88011.4010
+    \item R²: 0.9332
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.37.png}
+        \caption{Historia funkcji straty dla RegParam = 20.0}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.39.png}
+        \caption{Regresja i punkty dla RegParam = 20.0}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{RegParam = 50.0}
+Przy silnej regularyzacji:
+\begin{itemize}
+    \item Współczynnik: -72.9999
+    \item Wyraz wolny: 617.9655
+    \item MSE: 88304.9462
+    \item R²: 0.9329
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.52.png}
+        \caption{Historia funkcji straty dla RegParam = 50.0}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.47.55.png}
+        \caption{Regresja i punkty dla RegParam = 50.0}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{RegParam = 100.0}
+Przy bardzo silnej regularyzacji:
+\begin{itemize}
+    \item Współczynnik: -71.0262
+    \item Wyraz wolny: 566.1597
+    \item MSE: 90336.8273
+    \item R²: 0.9314
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.48.21.png}
+        \caption{Historia funkcji straty dla RegParam = 100.0}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 21.48.23.png}
+        \caption{Regresja i punkty dla RegParam = 100.0}
+    \end{minipage}
+\end{figure}
+
+\section{Analiza pozostałych zbiorów danych}
+
+\subsection{Analiza poszczególnych zbiorów}
+
+\subsubsection{Zbiór xy-001.csv}
+Analiza pierwszego zbioru danych wykazała następujące metryki:
+\begin{itemize}
+    \item MSE: 98.5211
+    \item RMSE: 9.9258
+    \item MAE: 8.3756
+    \item R²: 0.9289
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.14.02.png}
+        \caption{Historia funkcji straty dla xy-001}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.14.07.png}
+        \caption{Regresja i punkty dla xy-001}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-002.csv}
+Analiza drugiego zbioru danych:
+\begin{itemize}
+    \item MSE: 88011.4010
+    \item RMSE: 296.6672
+    \item MAE: 259.7641
+    \item R²: 0.9332
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.14.39.png}
+        \caption{Historia funkcji straty dla xy-002}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.14.47.png}
+        \caption{Regresja i punkty dla xy-002}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-003.csv}
+Wyniki dla trzeciego zbioru danych:
+\begin{itemize}
+    \item MSE: 155761.2500
+    \item RMSE: 394.6660
+    \item MAE: 318.8897
+    \item R²: 0.8352
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.03.png}
+        \caption{Historia funkcji straty dla xy-003}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.04.png}
+        \caption{Regresja i punkty dla xy-003}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-004.csv}
+Analiza czwartego zbioru danych:
+\begin{itemize}
+    \item MSE: 2989424.6945
+    \item RMSE: 1728.9953
+    \item MAE: 1460.5613
+    \item R²: 0.0015
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.21.png}
+        \caption{Historia funkcji straty dla xy-004}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.23.png}
+        \caption{Regresja i punkty dla xy-004}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-005.csv}
+Wyniki dla piątego zbioru danych:
+\begin{itemize}
+    \item MSE: 1314.8936
+    \item RMSE: 36.2615
+    \item MAE: 27.3464
+    \item R²: 0.2764
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.43.png}
+        \caption{Historia funkcji straty dla xy-005}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.15.44.png}
+        \caption{Regresja i punkty dla xy-005}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-006.csv}
+Analiza szóstego zbioru danych:
+\begin{itemize}
+    \item MSE: 9.0792
+    \item RMSE: 3.0132
+    \item MAE: 2.6499
+    \item R²: ≈ 0
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.01.png}
+        \caption{Historia funkcji straty dla xy-006}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.12.png}
+        \caption{Regresja i punkty dla xy-006}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-007.csv}
+Wyniki dla siódmego zbioru danych:
+\begin{itemize}
+    \item MSE: 6.0685
+    \item RMSE: 2.4634
+    \item MAE: 2.0917
+    \item R²: ≈ 0
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.36.png}
+        \caption{Historia funkcji straty dla xy-007}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.38.png}
+        \caption{Regresja i punkty dla xy-007}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-008.csv}
+Analiza ósmego zbioru danych:
+\begin{itemize}
+    \item MSE: 32.7178
+    \item RMSE: 5.7200
+    \item MAE: 4.8248
+    \item R²: ≈ 0
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.53.png}
+        \caption{Historia funkcji straty dla xy-008}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.16.55.png}
+        \caption{Regresja i punkty dla xy-008}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-009.csv}
+Wyniki dla dziewiątego zbioru danych:
+\begin{itemize}
+    \item MSE: 19.0951
+    \item RMSE: 4.3698
+    \item MAE: 3.7244
+    \item R²: ≈ 0
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.17.09.png}
+        \caption{Historia funkcji straty dla xy-009}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.17.11.png}
+        \caption{Regresja i punkty dla xy-009}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Zbiór xy-010.csv}
+Analiza dziesiątego zbioru danych:
+\begin{itemize}
+    \item MSE: 25.4716
+    \item RMSE: 5.0469
+    \item MAE: 4.2663
+    \item R²: ≈ 0
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.17.51.png}
+        \caption{Historia funkcji straty dla xy-010}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-24 at 22.17.54.png}
+        \caption{Regresja i punkty dla xy-010}
+    \end{minipage}
+\end{figure}
+
+\section{Porównanie xy-002 i xy-004}
+
+\subsection{xy-002}
+\begin{verbatim}
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.933
+Model:                            OLS   Adj. R-squared:                  0.933
+Method:                 Least Squares   F-statistic:                     1370.
+Date:                Mon, 24 Mar 2025   Prob (F-statistic):           2.10e-59
+Time:                        23:08:26   Log-Likelihood:                -711.10
+No. Observations:                 100   AIC:                             1426.
+Df Residuals:                      98   BIC:                             1431.
+Df Model:                           1                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+const        652.8037     60.627     10.768      0.000     532.491     773.116
+x1           -74.3271      2.008    -37.012      0.000     -78.312     -70.342
+==============================================================================
+Omnibus:                       11.135   Durbin-Watson:                   0.062
+Prob(Omnibus):                  0.004   Jarque-Bera (JB):                7.706
+Skew:                          -0.547   Prob(JB):                       0.0212
+Kurtosis:                       2.191   Cond. No.                         61.2
+==============================================================================    
+\end{verbatim}
+
+\begin{itemize}
+    \item  Jaką wartość ma współczynnik determinacji?
+    
+Współczynnik determinacji (R-squared) wynosi 0.933, czyli 93.3\% zmienności zmiennej zależnej jest wyjaśnione przez model.
+
+    \item Jaki jest błąd standardowy wyznaczonych współczynników?
+    
+Błędy standardowe (std err) dla współczynników wynoszą:
+    Dla wyrazu wolnego: 60.627
+    Dla zmiennej x1: 2.008
+
+    \item W jakim zakresie mieszczą się z 95\% wiarygodnością?
+    
+95\% przedziały ufności (widoczne w kolumnach [0.025] i [0.975]):
+    Dla wyrazu wolnego: od 532.491 do 773.116
+    Dla zmiennej x1: od -78.312 do -70.342
+
+\end{itemize}
+
+
+\subsection{xy-004}
+\begin{verbatim}
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.002
+Model:                            OLS   Adj. R-squared:                 -0.009
+Method:                 Least Squares   F-statistic:                    0.1537
+Date:                Mon, 24 Mar 2025   Prob (F-statistic):              0.696
+Time:                        23:23:17   Log-Likelihood:                -887.42
+No. Observations:                 100   AIC:                             1779.
+Df Residuals:                      98   BIC:                             1784.
+Df Model:                           1                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+const       4124.0872    352.826     11.689      0.000    3423.916    4824.258
+x1             4.8670     12.415      0.392      0.696     -19.771      29.505
+==============================================================================
+Omnibus:                        9.293   Durbin-Watson:                   0.013
+Prob(Omnibus):                  0.010   Jarque-Bera (JB):                8.946
+Skew:                          -0.671   Prob(JB):                       0.0114
+Kurtosis:                       2.414   Cond. No.                         57.5
+==============================================================================
+\end{verbatim}
+
+\begin{itemize}
+    \item  Jaką wartość ma współczynnik determinacji?
+    
+Współczynnik determinacji (R-squared) jest bardzo niski i wynosi 0.002, co oznacza, że tylko 0.2\% zmienności zmiennej zależnej jest wyjaśnione przez model. To wskazuje na bardzo słabe dopasowanie modelu.
+
+    \item Jaki jest błąd standardowy wyznaczonych współczynników?
+    
+Błędy standardowe (std err) dla współczynników wynoszą:
+    Dla wyrazu wolnego (stałej): 352.826
+    Dla zmiennej x1: 12.415
+
+    \item W jakim zakresie mieszczą się z 95\% wiarygodnością?
+    
+95\% przedziały ufności (widoczne w kolumnach [0.025] i [0.975]):
+    Dla wyrazu wolnego: od 3423.916 do 4824.258
+    Dla x1: od -19.771 do 29.505
+
+    \item Jak zinterpretujesz fakt, że dolna granica przedziału ufności dla współczynnika x1 to liczba ujemna, a górna to dodatnia?
+
+Przedział ufności dla współczynnika x1 zawierający zarówno wartości ujemne jak i dodatnie oznacza, że nie możemy stwierdzić, że zmienna x1 ma jakikolwiek istotny wpływ na zmienną zależną.
+
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{reg.png}
+        \caption{Skrajne przebiegi dla xy-002}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{image.png}
+        \caption{Skrajne przebiegi dla xy-004}
+    \end{minipage}
+\end{figure}
+
+\end{document}

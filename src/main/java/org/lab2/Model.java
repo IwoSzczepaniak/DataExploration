@@ -73,6 +73,16 @@ public class Model {
 
             plt.plot().add(fx, fy).color("r").label("pred");
 
+            // List<Double> fyLower = fx.stream()
+            //         .map(x_val -> 3423.916 + (-19.771) * x_val) // dolna granica
+            //         .collect(Collectors.toList());
+            // List<Double> fyUpper = fx.stream()
+            //         .map(x_val -> 4824.258 + 29.505 * x_val)    // górna granica
+            //         .collect(Collectors.toList());
+
+            // plt.plot().add(fx, fyLower).color("g").linestyle("--").label("Lower bound");
+            // plt.plot().add(fx, fyUpper).color("b").linestyle("--").label("Upper bound");
+
             if (f_true != null) {
                 List<Double> fy_true = fx.stream()
                         .map(f_true::apply)
@@ -94,13 +104,13 @@ public class Model {
     }
 
     static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
-            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true) {
+            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName) {
 
         String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);
 
         // 1.2
         LinearRegression lr = new LinearRegression()
-                .setMaxIter(10)
+                .setMaxIter(100)
                 .setRegParam(regParam)
                 .setElasticNetParam(elasticNetParam)
                 .setFeaturesCol("features")
@@ -114,23 +124,24 @@ public class Model {
         LinearRegressionTrainingSummary trainingSummary = lrModel.summary();
         System.out.println("numIterations: " + trainingSummary.totalIterations());
         System.out.println("objectiveHistory: " + Vectors.dense(trainingSummary.objectiveHistory()));
-        trainingSummary.residuals().show(100);
+        trainingSummary.residuals().show(5);
         System.out.println("MSE: " + trainingSummary.meanSquaredError());
         System.out.println("RMSE: " + trainingSummary.rootMeanSquaredError());
         System.out.println("MAE: " + trainingSummary.meanAbsoluteError());
         System.out.println("r2: " + trainingSummary.r2());
 
-        plotObjectiveHistory(trainingSummary.objectiveHistory(), params);
+        plotObjectiveHistory(trainingSummary.objectiveHistory(), params + " | " + resourceName);
 
         // // 1.3
         // plot(xValues, yValues, lrModel, "Linear regression", null);
 
         // 1.3 extra
-        plot(xValues, yValues, lrModel, "Linear regression" + params, f_true);
+        plot(xValues, yValues, lrModel, "Linear regression" + params + " | " + resourceName, f_true);
     }
 
     public static void main(String[] args) {
         var resourceName = args[0];
+        System.out.println("Resource name: " + resourceName);
         SparkSession spark = SparkSession.builder()
                 .appName("Load XY Data")
                 .master("local[*]")
@@ -169,11 +180,11 @@ public class Model {
         // Function<Double, Double> f_true = x -> 2.5 * x + 1;
 
         // for (double regParam : regParams) {
-        //     trainAndEvaluateModel(vectorData, regParam, elasticNetParam, xValues, yValues, null);
+        //     trainAndEvaluateModel(vectorData, regParam, elasticNetParam, xValues, yValues, null, resourceName);
         // }
 
         // 3
-        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null);
+        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null, resourceName);
 
         spark.stop();
     }

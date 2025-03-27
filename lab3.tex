@@ -1,0 +1,200 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[T1]{fontenc}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+\title{Eksploracja Danych - zadanie 3}
+\author{Iwo Szczepaniak}
+
+\begin{document}
+\maketitle
+
+\section{Przetwarzanie zbioru xy-001}
+\begin{verbatim}
+Resource name: xy-002.csv
+Data with polynomial features:
++--------+----------+------------------+
+|       X|         Y|                X2|
++--------+----------+------------------+
+|0.411194|-59.938274|    0.169080505636|
+|0.549662|-72.006761|    0.302128314244|
+|0.860093|-68.979336|    0.739759968649|
+| 1.27504|  32.07157|1.6257270015999998|
+|2.202931|-91.531894|    4.852904990761|
++--------+----------+------------------+
+only showing top 5 rows
+
+root
+ |-- X: double (nullable = true)
+ |-- Y: double (nullable = true)
+ |-- X2: double (nullable = true)
+\end{verbatim}
+
+\subsection{Analiza wizualna}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{1.png}
+        \caption{Wykres 1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{2.png}
+        \caption{Wykres 2}
+    \end{minipage}
+\end{figure}
+
+\subsection{Wszystkie pliki}
+\subsubsection{Analiza pierwszego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.37.32.png}
+        \caption{Wykres 3}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.37.43.png}
+        \caption{Wykres 4}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza drugiego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{3.png}
+        \caption{Wykres 5}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.38.14.png}
+        \caption{Wykres 6}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza trzeciego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.38.48.png}
+        \caption{Wykres 7}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.38.57.png}
+        \caption{Wykres 8}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza czwartego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.39.22.png}
+        \caption{Wykres 9}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.39.30.png}
+        \caption{Wykres 10}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza piątego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.40.16.png}
+        \caption{Wykres 11}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.40.48.png}
+        \caption{Wykres 12}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza szóstego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.41.01.png}
+        \caption{Wykres 13}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.41.48.png}
+        \caption{Wykres 14}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza siódmego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.41.24.png}
+        \caption{Wykres 15}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.42.01.png}
+        \caption{Wykres 16}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza ósmego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{4e.png}
+        \caption{Wykres 17}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{5.png}
+        \caption{Wykres 18}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza dziewiątego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{1age.png}
+        \caption{Wykres 19}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{12e.png}
+        \caption{Wykres 20}
+    \end{minipage}
+\end{figure}
+
+\subsubsection{Analiza dziesiątego zestawu}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.43.09.png}
+        \caption{Wykres 21}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Screenshot 2025-03-27 at 15.43.23.png}
+        \caption{Wykres 22}
+    \end{minipage}
+\end{figure}
+
+\end{document}

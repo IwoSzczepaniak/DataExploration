@@ -39,7 +39,7 @@ public class LinearRegressionPolynomialFeaturesOrderTwo {
                 .map(row -> row.getDouble(1))
                 .collect(Collectors.toList());
 
-        Model.trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, f_true, filename, 2);
+        Model.trainAndEvaluate(vectorData, 0.3, 0.8, xValues, yValues, f_true, filename, 2);
     }
 
     public static void main(String[] args) {

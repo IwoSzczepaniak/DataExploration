@@ -53,7 +53,7 @@ public class Model {
      * @param f_true  - funkcja f_true (może być null)
      */
     static void plot(List<Double> x, List<Double> y, LinearRegressionModel lrModel, String title,
-            Function<Double, Double> f_true) {
+            Function<Double, Double> f_true, int order) {
         Plot plt = Plot.create(PythonConfig.pythonBinPathConfig("python3"));
         try {
             plt.plot().add(x, y, ".").label("data");
@@ -66,8 +66,11 @@ public class Model {
 
             List<Double> fy = fx.stream()
                     .map(x_val -> {
-                        double[] arr = new double[] { x_val };
-                        return lrModel.predict(new DenseVector(arr));
+                        double[] features = new double[order];
+                        for (int i = 0; i < order; i++) {
+                            features[i] = Math.pow(x_val, i + 1);
+                        }
+                        return lrModel.predict(new DenseVector(features));
                     })
                     .collect(Collectors.toList());
 
@@ -93,7 +96,7 @@ public class Model {
             if (title != null) {
                 plt.title(title);
             } else {
-                plt.title("Linear regression");
+                plt.title("Polynomial regression (order " + order + ")");
             }
 
             plt.legend();
@@ -104,7 +107,7 @@ public class Model {
     }
 
     public static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
-            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName) {
+            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName, int order) {
 
         String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);
 
@@ -136,7 +139,7 @@ public class Model {
         // plot(xValues, yValues, lrModel, "Linear regression", null);
 
         // 1.3 extra
-        plot(xValues, yValues, lrModel, "Linear regression" + params + " | " + resourceName, f_true);
+        plot(xValues, yValues, lrModel, "Polynomial regression (order " + order + ")" + params + " | " + resourceName, f_true, order);
     }
 
     public static void main(String[] args) {
@@ -184,7 +187,7 @@ public class Model {
         // }
 
         // 3
-        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null, resourceName);
+        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null, resourceName, 1);
 
         spark.stop();
     }

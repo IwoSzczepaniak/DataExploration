@@ -32,12 +32,10 @@ public class Model {
             plt.plot().add(x, lossList).label("loss");
             plt.xlabel("Iteration");
             plt.ylabel("Loss");
-            if (params != null) {
-                plt.title("Loss history " + params);
-            } else {
-                plt.title("Loss history");
-            }
+            String title = params != null ? "Loss history " + params : "Loss history";
+            plt.title(title);
             plt.legend();
+            plt.savefig("output/" + title.replaceAll("\\s+", "_") + ".png");
             plt.show();
         } catch (IOException | PythonExecutionException e) {
             throw new RuntimeException(e);
@@ -76,16 +74,6 @@ public class Model {
 
             plt.plot().add(fx, fy).color("r").label("pred");
 
-            // List<Double> fyLower = fx.stream()
-            //         .map(x_val -> 3423.916 + (-19.771) * x_val) // dolna granica
-            //         .collect(Collectors.toList());
-            // List<Double> fyUpper = fx.stream()
-            //         .map(x_val -> 4824.258 + 29.505 * x_val)    // górna granica
-            //         .collect(Collectors.toList());
-
-            // plt.plot().add(fx, fyLower).color("g").linestyle("--").label("Lower bound");
-            // plt.plot().add(fx, fyUpper).color("b").linestyle("--").label("Upper bound");
-
             if (f_true != null) {
                 List<Double> fy_true = fx.stream()
                         .map(f_true::apply)
@@ -93,13 +81,10 @@ public class Model {
                 plt.plot().add(fx, fy_true).color("g").linestyle("--").label("$f_{true}$");
             }
 
-            if (title != null) {
-                plt.title(title);
-            } else {
-                plt.title("Polynomial regression (order " + order + ")");
-            }
-
+            String plotTitle = title != null ? title : "Polynomial regression (order " + order + ")";
+            plt.title(plotTitle);
             plt.legend();
+            plt.savefig("output/" + plotTitle.replaceAll("\\s+", "_") + ".png");
             plt.show();
         } catch (IOException | PythonExecutionException e) {
             throw new RuntimeException(e);

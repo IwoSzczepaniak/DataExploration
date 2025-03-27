@@ -103,7 +103,7 @@ public class Model {
         }
     }
 
-    static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
+    public static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
             List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName) {
 
         String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);

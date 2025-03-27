@@ -13,7 +13,8 @@ import org.lab2.Model;
 
 public class LinearRegressionPolynomialFeaturesOrderTwo {
     
-    static void processDataset(SparkSession spark, String filename, Function<Double, Double> f_true) {
+    static void processDataset(SparkSession spark, String filename, Function<Double, Double> f_true,
+            double regParam, double elasticNetParam, int maxIter) {
         Dataset<Row> data = spark.read()
                 .option("header", "true")
                 .option("inferSchema", "true")
@@ -39,7 +40,7 @@ public class LinearRegressionPolynomialFeaturesOrderTwo {
                 .map(row -> row.getDouble(1))
                 .collect(Collectors.toList());
 
-        Model.trainAndEvaluate(vectorData, 0.3, 0.8, xValues, yValues, f_true, filename, 2);
+        Model.trainAndEvaluate(vectorData, regParam, elasticNetParam, maxIter, xValues, yValues, f_true, filename, 2);
     }
 
     public static void main(String[] args) {
@@ -51,7 +52,7 @@ public class LinearRegressionPolynomialFeaturesOrderTwo {
                 .master("local[*]")
                 .getOrCreate();
 
-        processDataset(spark, resourceName, null);
+        processDataset(spark, resourceName, null, 10, 0.8, 100);
 
         spark.stop();
     }

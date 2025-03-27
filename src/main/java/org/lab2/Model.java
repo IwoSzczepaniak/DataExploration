@@ -107,13 +107,13 @@ public class Model {
     }
 
     public static void trainAndEvaluate(Dataset<Row> vectorData, double regParam, double elasticNetParam,
-            List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName, int order) {
+            int maxIter, List<Double> xValues, List<Double> yValues, Function<Double, Double> f_true, String resourceName, int order) {
 
-        String params = String.format(" regParam=%.1f, elasticNetParam=%.1f", regParam, elasticNetParam);
+        String params = String.format(" regP=%.1f, elasticNetP=%.1f, maxIter=%d", regParam, elasticNetParam, maxIter);
 
         // 1.2
         LinearRegression lr = new LinearRegression()
-                .setMaxIter(100)
+                .setMaxIter(maxIter)
                 .setRegParam(regParam)
                 .setElasticNetParam(elasticNetParam)
                 .setFeaturesCol("features")
@@ -139,7 +139,7 @@ public class Model {
         // plot(xValues, yValues, lrModel, "Linear regression", null);
 
         // 1.3 extra
-        plot(xValues, yValues, lrModel, "Polynomial regression (order " + order + ")" + params + " | " + resourceName, f_true, order);
+        plot(xValues, yValues, lrModel, "Pol reg (order: " + order + ")" + params + " | " + resourceName, f_true, order);
     }
 
     public static void main(String[] args) {
@@ -187,7 +187,7 @@ public class Model {
         // }
 
         // 3
-        trainAndEvaluate(vectorData, 10.0, 0.8, xValues, yValues, null, resourceName, 1);
+        trainAndEvaluate(vectorData, 10.0, 0.8, 100, xValues, yValues, null, resourceName, 1);
 
         spark.stop();
     }

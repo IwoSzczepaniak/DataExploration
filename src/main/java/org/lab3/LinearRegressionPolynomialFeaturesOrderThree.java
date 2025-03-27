@@ -54,7 +54,7 @@ public class LinearRegressionPolynomialFeaturesOrderThree {
                 .master("local[*]")
                 .getOrCreate();
 
-        processDataset(spark, resourceName, null, 10, 0.8, 100);
+        processDataset(spark, resourceName, null, 0.3, 0.8, 10);
 
         spark.stop();
     }

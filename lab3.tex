@@ -576,5 +576,170 @@ Implementacja z wykorzystaniem Pipeline API pozwoliła na uproszczenie procesu p
     \item LinearRegression - wykonuje regresję liniową na rozszerzonych cechach
 \end{itemize}
 
+\section{Podział na zbiór uczący i testowy}
+W tej sekcji przedstawiono wyniki dla różnych metod podziału danych na zbiór uczący i testowy. Dla każdego zbioru danych przetestowano trzy podejścia:
+\begin{itemize}
+    \item Stały podział (fixed split) - pierwsze 70\% danych jako zbiór uczący, pozostałe 30\% jako testowy
+    \item Losowy podział (random split) - 70\% danych wybranych losowo jako zbiór uczący, pozostałe 30\% jako testowy
+    \item Przetasowany stały podział (shuffled fixed split) - dane są najpierw tasowane, a następnie dzielone w proporcji 70/30
+\end{itemize}
+
+\subsection{Wyniki dla zbioru xy-003.csv (stopień 3)}
+\begin{verbatim}
+Fixed split:
+Training set size: 70
+Test set size: 30
+Training R²: 0.629
+Training MSE: 100609.703
+Test RMSE: 647.061
+Test R²: -1.019
+
+Random split:
+Training set size: 72
+Test set size: 28
+Training R²: 0.913
+Training MSE: 85343.110
+Test RMSE: 348.386
+Test R²: 0.856
+
+Shuffled fixed split:
+Training set size: 70
+Test set size: 30
+Training R²: 0.908
+Training MSE: 89538.815
+Test RMSE: 335.514
+Test R²: 0.874
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(fixed_split,_training_data).png}
+        \caption{Wynik dla stałego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(fixed_split,_test_data).png}
+        \caption{Wynik dla stałego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(random_split,_training_data).png}
+        \caption{Wynik dla losowego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(random_split,_test_data).png}
+        \caption{Wynik dla losowego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(shuffled_split,_training_data).png}
+        \caption{Wynik dla przetasowanego stałego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-003.csv_(shuffled_split,_test_data).png}
+        \caption{Wynik dla przetasowanego stałego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\subsection{Wyniki dla zbioru xy-005.csv (stopień 2)}
+\begin{verbatim}
+Fixed split:
+Training set size: 70
+Test set size: 30
+Training R²: 0.171
+Training MSE: 291.034
+Test RMSE: 117.149
+Test R²: -4.893
+
+Random split:
+Training set size: 75
+Test set size: 25
+Training R²: 0.594
+Training MSE: 771.928
+Test RMSE: 27.203
+Test R²: 0.517
+
+Shuffled fixed split:
+Training set size: 70
+Test set size: 30
+Training R²: 0.556
+Training MSE: 809.373
+Test RMSE: 25.711
+Test R²: 0.633
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(fixed_split,_training_data).png}
+        \caption{Wynik dla stałego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(fixed_split,_test_data).png}
+        \caption{Wynik dla stałego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(random_split,_training_data).png}
+        \caption{Wynik dla losowego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(random_split,_test_data).png}
+        \caption{Wynik dla losowego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(shuffled_split,_training_data).png}
+        \caption{Wynik dla przetasowanego stałego podziału (zbiór uczący)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \includegraphics[width=\linewidth]{Linear_regression:_xy-005.csv_(shuffled_split,_test_data).png}
+        \caption{Wynik dla przetasowanego stałego podziału (zbiór testowy)}
+    \end{minipage}
+\end{figure}
+
+\subsection{Analiza wyników podziału}
+Analiza wyników pokazuje znaczące różnice między różnymi metodami podziału danych:
+
+\begin{itemize}
+    \item \textbf{Zbiór xy-003.csv (stopień 3)}:
+    \begin{itemize}
+        \item Stały podział wykazał się najgorszymi wynikami (R² = -1.019 na zbiorze testowym), co sugeruje, że dane nie były równomiernie rozłożone
+        \item Losowy podział znacząco poprawił wyniki (R² = 0.856)
+        \item Przetasowany stały podział dał najlepsze wyniki (R² = 0.874), co potwierdza, że równomierne rozłożenie danych jest kluczowe
+    \end{itemize}
+
+    \item \textbf{Zbiór xy-005.csv (stopień 2)}:
+    \begin{itemize}
+        \item Stały podział również wykazał się najgorszymi wynikami (R² = -4.893)
+        \item Losowy podział znacząco poprawił wyniki (R² = 0.517)
+        \item Przetasowany stały podział dał najlepsze wyniki (R² = 0.633)
+    \end{itemize}
+\end{itemize}
+
+Wnioski:
+\begin{itemize}
+    \item Stały podział bez wcześniejszego tasowania może prowadzić do bardzo złych wyników, szczególnie gdy dane nie są równomiernie rozłożone
+    \item Losowy podział jest lepszym rozwiązaniem, ale może dawać różne wyniki w zależności od konkretnego podziału
+    \item Przetasowany stały podział łączy zalety obu poprzednich metod - zapewnia równomierne rozłożenie danych i powtarzalne wyniki
+\end{itemize}
 
 \end{document}

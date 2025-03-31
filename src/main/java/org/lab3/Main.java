@@ -7,6 +7,6 @@ public class Main {
         // for (String resource : resources) {
         //     LinearRegressionPolynomialFeaturesOrderThree.main(new String[] { resource });
         // }
-        PolynomialRegressionComparison.main(new String[] {});
+        LinearRegressionPolynomialFeaturesPipeline.main(new String[] {});
     }
 }

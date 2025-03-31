@@ -228,7 +228,6 @@ Ponieważ w poprzednim podpunkcie ustawiłem liczbę iteracji na 100, to wyniki 
 
 \section{Cechy wielomianowe 3 stopnia}
 
-\subsection{Analiza funkcji straty i dopasowania modelu}
 \subsubsection{Zbiór xy-001}
 \begin{figure}[H]
     \centering
@@ -368,5 +367,54 @@ Ponieważ w poprzednim podpunkcie ustawiłem liczbę iteracji na 100, to wyniki 
         \caption{Dopasowanie modelu}
     \end{minipage}
 \end{figure}
+
+\subsection{Porównanie wartości miary r2 i MSE dla regresji 2 i 3 stopnia}
+
+\begin{verbatim}
+Coefficients for xy-001.csv order 2: [1.354,0.008]
+Coefficients for xy-001.csv order 3: [2.016,0.007,-0.000]
+--------------------------------
+Coefficients for xy-002.csv order 2: [0.000,-1.422]
+Coefficients for xy-002.csv order 3: [-11.541,-0.726,-0.010]
+--------------------------------
+Coefficients for xy-003.csv order 2: [0.000,-1.399]
+Coefficients for xy-003.csv order 3: [-11.486,-0.689,-0.011]
+--------------------------------
+Coefficients for xy-004.csv order 2: [465.840,-9.324]
+Coefficients for xy-004.csv order 3: [271.982,-1.279,-0.089]
+--------------------------------
+Coefficients for xy-005.csv order 2: [3.728,1.816]
+Coefficients for xy-005.csv order 3: [-7.420,2.165,0.787]
+--------------------------------
+Coefficients for xy-006.csv order 2: [0.000,0.000]
+Coefficients for xy-006.csv order 3: [0.000,0.000,0.000]
+--------------------------------
+Coefficients for xy-007.csv order 2: [0.000,0.000]
+Coefficients for xy-007.csv order 3: [0.000,0.000,0.000]
+--------------------------------
+Coefficients for xy-008.csv order 2: [0.000,0.000]
+Coefficients for xy-008.csv order 3: [-1.317,-0.079,-0.003]
+--------------------------------
+Coefficients for xy-009.csv order 2: [0.000,0.000]
+Coefficients for xy-009.csv order 3: [-1.119,-0.043,0.000]
+--------------------------------
+Coefficients for xy-010.csv order 2: [0.000,0.000]
+Coefficients for xy-010.csv order 3: [-0.182,0.000,-0.000]
+--------------------------------
+
+
+Dataset         2nd Degree R²   2nd Degree MSE  3rd Degree R²   3rd Degree MSE
+--------        -------------   --------------  -------------   --------------
+xy-001.csv      | 0.931           | 96.131          | 0.992           | 10.816          
+xy-002.csv      | 0.998           | 3043.468        | 0.997           | 3745.423        
+xy-003.csv      | 0.899           | 95846.726       | 0.898           | 96836.173       
+xy-004.csv      | 0.992           | 23905.603       | 0.932           | 204613.519      
+xy-005.csv      | 0.514           | 883.639         | 0.868           | 239.822         
+xy-006.csv      | -0.000          | 9.079           | -0.000          | 9.079           
+xy-007.csv      | 0.000           | 6.068           | 0.000           | 6.068           
+xy-008.csv      | 0.000           | 32.718          | 0.265           | 24.033          
+xy-009.csv      | -0.000          | 19.095          | 0.941           | 1.123           
+xy-010.csv      | 0.000           | 25.472          | 0.037           | 24.534              
+\end{verbatim}
 
 \end{document}

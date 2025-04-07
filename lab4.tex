@@ -1,0 +1,153 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[T1]{fontenc}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+\title{Eksploracja Danych - zadanie 4}
+\author{Iwo Szczepaniak}
+
+\begin{document}
+\maketitle
+
+\section{2.1 PiComputeApp}
+W tej sekcji przedstawiono aplikację wykorzystującą metodę Monte Carlo do obliczania przybliżonej wartości liczby $\pi$. Aplikacja została uruchomiona w środowisku Spark, które umożliwia realizację obliczeń równoległych.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Screenshot 2025-04-03 at 15.55.17.png}
+    \caption{Uruchomienie aplikacji PiComputeApp w środowisku Spark. Aplikacja wykorzystuje metodę Monte Carlo do estymacji liczby $\pi$.}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Screenshot 2025-04-03 at 15.55.38.png}
+    \caption{Wynik estymacji liczby $\pi$ w aplikacji PiComputeApp oraz czas wykonania aplikacji.}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\section{2.2 PiComputeAppDistributed}
+W tej sekcji zaprezentowano rozproszoną wersję aplikacji do obliczania liczby $\pi$ z wykorzystaniem klastra Spark. Obliczenia są wykonywane równolegle na wielu węzłach, co zwiększa wydajność przetwarzania.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{Screenshot 2025-04-03 at 16.00.49.png}
+    \caption{Uruchomienie rozproszonej wersji aplikacji PiComputeAppDistributed wykorzystującej klaster Spark do równoległych obliczeń.}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\section{2.3 LoadDistributedDataset}
+W tej sekcji przedstawiono sposób wczytywania i przetwarzania zbioru danych przy pomocy Sparka. Wykorzystano operacje na DataFrame do filtrowania i selekcji danych dotyczących zużycia energii.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{2_3.png}
+    \caption{Uruchomienie aplikacji LoadDistributedDataset wczytującej i filtrującej zbiór danych o zużyciu energii przy pomocy operacji Dataframe.}
+    \label{fig:enter-label}
+\end{figure}
+
+\begin{verbatim}
+    25/04/07 18:50:02 INFO FileSourceStrategy: Pushed Filters: IsNotNull(country),IsNotNull(year),StringStartsWith(country,Po),GreaterThanOrEqual(year,2000)
+25/04/07 18:50:02 INFO FileSourceStrategy: Post-Scan Filters: isnotnull(country#17),isnotnull(year#18),StartsWith(country#17, Po),(year#18 >= 2000)
+25/04/07 18:50:02 INFO CodeGenerator: Code generated in 9.074875 ms
+25/04/07 18:50:02 INFO MemoryStore: Block broadcast_6 stored as values in memory (estimated size 199.8 KiB, free 2.2 GiB)
+25/04/07 18:50:02 INFO MemoryStore: Block broadcast_6_piece0 stored as bytes in memory (estimated size 34.4 KiB, free 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Added broadcast_6_piece0 in memory on b53ccd39f6b4:43263 (size: 34.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO SparkContext: Created broadcast 6 from show at LoadDistributedDataset.java:22
+25/04/07 18:50:02 INFO FileSourceScanExec: Planning scan with bin packing, max size: 4194304 bytes, open cost is considered as scanning 4194304 bytes.
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_2_piece0 on b53ccd39f6b4:43263 in memory (size: 34.3 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO SparkContext: Starting job: show at LoadDistributedDataset.java:22
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_2_piece0 on 172.22.0.3:33883 in memory (size: 34.3 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO DAGScheduler: Got job 3 (show at LoadDistributedDataset.java:22) with 1 output partitions
+25/04/07 18:50:02 INFO DAGScheduler: Final stage: ResultStage 3 (show at LoadDistributedDataset.java:22)
+25/04/07 18:50:02 INFO DAGScheduler: Parents of final stage: List()
+25/04/07 18:50:02 INFO DAGScheduler: Missing parents: List()
+25/04/07 18:50:02 INFO DAGScheduler: Submitting ResultStage 3 (MapPartitionsRDD[17] at show at LoadDistributedDataset.java:22), which has no missing parents
+25/04/07 18:50:02 INFO MemoryStore: Block broadcast_7 stored as values in memory (estimated size 24.1 KiB, free 2.2 GiB)
+25/04/07 18:50:02 INFO MemoryStore: Block broadcast_7_piece0 stored as bytes in memory (estimated size 10.4 KiB, free 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Added broadcast_7_piece0 in memory on b53ccd39f6b4:43263 (size: 10.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO SparkContext: Created broadcast 7 from broadcast at DAGScheduler.scala:1580
+25/04/07 18:50:02 INFO DAGScheduler: Submitting 1 missing tasks from ResultStage 3 (MapPartitionsRDD[17] at show at LoadDistributedDataset.java:22) (first 15 tasks are for partitions Vector(0))
+25/04/07 18:50:02 INFO TaskSchedulerImpl: Adding task set 3.0 with 1 tasks resource profile 0
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_3_piece0 on b53ccd39f6b4:43263 in memory (size: 13.7 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO TaskSetManager: Starting task 0.0 in stage 3.0 (TID 3) (172.22.0.3, executor 1, partition 0, PROCESS_LOCAL, 8419 bytes) 
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_3_piece0 on 172.22.0.3:33883 in memory (size: 13.7 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_5_piece0 on b53ccd39f6b4:43263 in memory (size: 21.0 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_5_piece0 on 172.22.0.4:38317 in memory (size: 21.0 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Added broadcast_7_piece0 in memory on 172.22.0.3:33883 (size: 10.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_4_piece0 on b53ccd39f6b4:43263 in memory (size: 34.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Removed broadcast_4_piece0 on 172.22.0.4:38317 in memory (size: 34.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO BlockManagerInfo: Added broadcast_6_piece0 in memory on 172.22.0.3:33883 (size: 34.4 KiB, free: 2.2 GiB)
+25/04/07 18:50:02 INFO TaskSetManager: Finished task 0.0 in stage 3.0 (TID 3) in 189 ms on 172.22.0.3 (executor 1) (1/1)
+25/04/07 18:50:02 INFO TaskSchedulerImpl: Removed TaskSet 3.0, whose tasks have all completed, from pool 
+25/04/07 18:50:02 INFO DAGScheduler: ResultStage 3 (show at LoadDistributedDataset.java:22) finished in 0.197 s
+25/04/07 18:50:02 INFO DAGScheduler: Job 3 is finished. Cancelling potential speculative or zombie tasks for this job
+25/04/07 18:50:02 INFO TaskSchedulerImpl: Killing all running tasks in stage 3: Stage finished
+25/04/07 18:50:02 INFO DAGScheduler: Job 3 finished: show at LoadDistributedDataset.java:22, took 0.200650 s
+25/04/07 18:50:02 INFO CodeGenerator: Code generated in 4.112083 ms
++-------+----+----------+------------------+
+|country|year|population|electricity_demand|
++-------+----+----------+------------------+
+| Poland|2000|  38504432|            136.81|
+| Poland|2001|  38662860|            136.99|
+| Poland|2002|  38647476|            135.42|
+| Poland|2003|  38621536|            139.85|
+| Poland|2004|  38596040|            142.97|
++-------+----+----------+------------------+
+only showing top 5 rows
+
+root
+ |-- country: string (nullable = true)
+ |-- year: integer (nullable = true)
+ |-- population: long (nullable = true)
+ |-- electricity_demand: double (nullable = true)
+
+25/04/07 18:50:02 INFO SparkContext: Invoking stop() from shutdown hook
+25/04/07 18:50:02 INFO SparkContext: SparkContext is stopping with exitCode 0.
+25/04/07 18:50:02 INFO SparkUI: Stopped Spark web UI at http://b53ccd39f6b4:4040
+25/04/07 18:50:02 INFO StandaloneSchedulerBackend: Shutting down all executors
+25/04/07 18:50:02 INFO StandaloneSchedulerBackend$StandaloneDriverEndpoint: Asking each executor to shut down
+25/04/07 18:50:02 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
+25/04/07 18:50:02 INFO MemoryStore: MemoryStore cleared
+25/04/07 18:50:02 INFO BlockManager: BlockManager stopped
+25/04/07 18:50:02 INFO BlockManagerMaster: BlockManagerMaster stopped
+25/04/07 18:50:02 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+25/04/07 18:50:02 INFO SparkContext: Successfully stopped SparkContext
+25/04/07 18:50:02 INFO ShutdownHookManager: Shutdown hook called
+25/04/07 18:50:02 INFO ShutdownHookManager: Deleting directory /tmp/spark-08c3b3de-a61d-45b8-a668-1f9d51c67617
+25/04/07 18:50:02 INFO ShutdownHookManager: Deleting directory /tmp/spark-3254ec32-adde-4906-ad2c-b1008c238940
+\end{verbatim}
+
+\section{3 Pyspark + Jupyter}
+W tej sekcji zaprezentowano wykorzystanie PySpark z interfejsem Jupyter do analizy danych. Pokazano interaktywne podejście do eksploracji danych oraz wizualizację wyników przy pomocy biblioteki Matplotlib.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{3.png}
+    \caption{Uruchomienie aplikacji Jupyter z PySpark, która wykorzystuje interfejs Python do platformy Apache Spark. Środowisko pozwala na interaktywną analizę danych.}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{3_3.png}
+    \caption{Analiza danych energetycznych dla Polski z wykorzystaniem PySpark i Matplotlib. Przedstawia wizualizację danych i zastosowanie regresji liniowej.}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\end{document}

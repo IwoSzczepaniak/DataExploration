@@ -6,6 +6,11 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.ml.feature.RegexTokenizer;
 import org.apache.spark.ml.feature.CountVectorizer;
 import org.apache.spark.ml.feature.CountVectorizerModel;
+import org.apache.spark.ml.feature.StringIndexer;
+import org.apache.spark.ml.feature.StringIndexerModel;
+import org.apache.spark.ml.classification.DecisionTreeClassifier;
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.linalg.Vector;
 import static org.apache.spark.sql.functions.*;
 
@@ -55,7 +60,7 @@ public class AuthorRecognitionDecisionTree {
 
         CountVectorizerModel countVectorizerModel = countVectorizer.fit(df_tokenized);
         Dataset<Row> df_bow = countVectorizerModel.transform(df_tokenized);
-        
+
         System.out.println("\nSample of words and their feature vectors:");
         df_bow.select("words", "features").show(5, true);
 
@@ -63,7 +68,7 @@ public class AuthorRecognitionDecisionTree {
         Row firstRow = df_bow.first();
         Vector features = (Vector) firstRow.get(df_bow.schema().fieldIndex("features"));
         String[] vocabulary = countVectorizerModel.vocabulary();
-        
+
         System.out.println("First 20 word frequencies in first document:");
         int[] indices = features.toSparse().indices();
         double[] values = features.toSparse().values();
@@ -71,6 +76,38 @@ public class AuthorRecognitionDecisionTree {
             String word = vocabulary[indices[i]];
             double count = values[i];
             System.out.printf("%s -> %.6f%n", word, count);
+        }
+
+        System.out.println("\nConverting authors to numeric labels:");
+        StringIndexer labelIndexer = new StringIndexer()
+                .setInputCol("author")
+                .setOutputCol("label");
+        StringIndexerModel labelModel = labelIndexer.fit(df_bow);
+        df_bow = labelModel.transform(df_bow);
+        df_bow.select("author", "label").distinct().show();
+
+        System.out.println("\nTraining Decision Tree classifier:");
+        DecisionTreeClassifier dt = new DecisionTreeClassifier()
+                .setLabelCol("label")
+                .setFeaturesCol("features")
+                .setImpurity("gini")
+                .setMaxDepth(30);
+
+        DecisionTreeClassificationModel model = dt.fit(df_bow);
+
+        System.out.println("\nMaking predictions:");
+        Dataset<Row> df_predictions = model.transform(df_bow);
+        df_predictions.select("author", "label", "prediction").show();
+
+        System.out.println("\nModel evaluation:");
+        MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
+                .setLabelCol("label")
+                .setPredictionCol("prediction");
+
+        for(String metric : new String[]{"f1", "accuracy"}){
+            evaluator.setMetricName(metric);
+            double score = evaluator.evaluate(df_predictions);
+            System.out.printf("%s Score: %.4f%n", metric, score);
         }
 
         spark.stop();

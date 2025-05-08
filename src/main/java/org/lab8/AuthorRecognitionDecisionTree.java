@@ -3,6 +3,7 @@ package org.lab8;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.ml.feature.RegexTokenizer;
 import static org.apache.spark.sql.functions.*;
 
 public class AuthorRecognitionDecisionTree {
@@ -31,6 +32,15 @@ public class AuthorRecognitionDecisionTree {
                 .groupBy("author")
                 .agg(avg("content_length").alias("avg_text_length"));
         avgLengths.show();
+
+        System.out.println("\nTokenized content sample:");
+        String sep = "[\\s\\p{Punct}\\u2014\\u2026\\u201C\\u201E]+";
+        RegexTokenizer tokenizer = new RegexTokenizer()
+                .setInputCol("content")
+                .setOutputCol("words")
+                .setPattern(sep);
+        Dataset<Row> df_tokenized = tokenizer.transform(df);
+        df_tokenized.show(3, true);
 
         spark.stop();
     }

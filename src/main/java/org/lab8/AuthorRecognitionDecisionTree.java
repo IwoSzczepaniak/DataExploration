@@ -12,6 +12,7 @@ import org.apache.spark.ml.classification.DecisionTreeClassifier;
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.linalg.Vector;
+import org.apache.spark.ml.linalg.SparseVector;
 import static org.apache.spark.sql.functions.*;
 
 public class AuthorRecognitionDecisionTree {
@@ -55,8 +56,8 @@ public class AuthorRecognitionDecisionTree {
         CountVectorizer countVectorizer = new CountVectorizer()
                 .setInputCol("words")
                 .setOutputCol("features")
-                .setVocabSize(10_000)  // Set the maximum size of the vocabulary
-                .setMinDF(2);          // Set the minimum number of documents in which a term must appear
+                .setVocabSize(10_000)
+                .setMinDF(2);
 
         CountVectorizerModel countVectorizerModel = countVectorizer.fit(df_tokenized);
         Dataset<Row> df_bow = countVectorizerModel.transform(df_tokenized);
@@ -104,12 +105,36 @@ public class AuthorRecognitionDecisionTree {
                 .setLabelCol("label")
                 .setPredictionCol("prediction");
 
-        for(String metric : new String[]{"f1", "accuracy"}){
+        for (String metric : new String[] { "f1", "accuracy" }) {
             evaluator.setMetricName(metric);
             double score = evaluator.evaluate(df_predictions);
             System.out.printf("%s Score: %.4f%n", metric, score);
         }
 
+        System.out.println("\nFeature Importance Analysis:");
+        Vector featureImportances = model.featureImportances();
+        System.out.println("Raw feature importances vector:");
+        System.out.println(featureImportances);
+
+        System.out.println("\nMost important words for classification:");
+        SparseVector sparseImportances = (SparseVector) featureImportances;
+        int[] importantIndices = sparseImportances.indices();
+        double[] importantValues = sparseImportances.values();
+
+        WordImportance[] wordImportances = new WordImportance[importantIndices.length];
+        for (int i = 0; i < importantIndices.length; i++) {
+            String word = vocabulary[importantIndices[i]];
+            double importance = importantValues[i];
+            wordImportances[i] = new WordImportance(word, importance);
+        }
+
+        java.util.Arrays.sort(wordImportances, (a, b) -> Double.compare(b.importance, a.importance));
+
+        System.out.println("Top 20 most important words for author classification:");
+        for (int i = 0; i < Math.min(20, wordImportances.length); i++) {
+            System.out.printf("%s -> %.6f%n", wordImportances[i].word, wordImportances[i].importance);
+        }
+
         spark.stop();
     }
-} 
+}

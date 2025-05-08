@@ -4,6 +4,9 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.ml.feature.RegexTokenizer;
+import org.apache.spark.ml.feature.CountVectorizer;
+import org.apache.spark.ml.feature.CountVectorizerModel;
+import org.apache.spark.ml.linalg.Vector;
 import static org.apache.spark.sql.functions.*;
 
 public class AuthorRecognitionDecisionTree {
@@ -41,6 +44,34 @@ public class AuthorRecognitionDecisionTree {
                 .setPattern(sep);
         Dataset<Row> df_tokenized = tokenizer.transform(df);
         df_tokenized.show(3, true);
+
+        // Bag of Words conversion
+        System.out.println("\nBag of Words transformation:");
+        CountVectorizer countVectorizer = new CountVectorizer()
+                .setInputCol("words")
+                .setOutputCol("features")
+                .setVocabSize(10_000)  // Set the maximum size of the vocabulary
+                .setMinDF(2);          // Set the minimum number of documents in which a term must appear
+
+        CountVectorizerModel countVectorizerModel = countVectorizer.fit(df_tokenized);
+        Dataset<Row> df_bow = countVectorizerModel.transform(df_tokenized);
+        
+        System.out.println("\nSample of words and their feature vectors:");
+        df_bow.select("words", "features").show(5, true);
+
+        System.out.println("\nDetailed analysis of first document:");
+        Row firstRow = df_bow.first();
+        Vector features = (Vector) firstRow.get(df_bow.schema().fieldIndex("features"));
+        String[] vocabulary = countVectorizerModel.vocabulary();
+        
+        System.out.println("First 20 word frequencies in first document:");
+        int[] indices = features.toSparse().indices();
+        double[] values = features.toSparse().values();
+        for (int i = 0; i < Math.min(indices.length, 20); i++) {
+            String word = vocabulary[indices[i]];
+            double count = values[i];
+            System.out.printf("%s -> %.6f%n", word, count);
+        }
 
         spark.stop();
     }

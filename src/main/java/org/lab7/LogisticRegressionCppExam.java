@@ -135,6 +135,8 @@ public class LogisticRegressionCppExam {
                 .save("output/egzamin-with-classification.csv");
         System.out.println("Wyniki zapisane w output/egzamin-with-classification.csv");
 
+        LogisticRegressionScores.trainAndTest(assembledDf);
+
         spark.stop();
     }
 }

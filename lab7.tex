@@ -1,0 +1,499 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage[T1]{fontenc}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+\title{Eksploracja Danych - labortorium 9}
+\author{Iwo Szczepaniak}
+
+\begin{document}
+\maketitle
+
+\section{Ładowanie danych i przetwarzanie wstępne}
+\begin{verbatim}
+        Schemat załadowanych danych:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+
+Dane po wstępnym przetworzeniu:
++-----------------+------+----------+--------+-------+----------+-----+
+|ImieNazwisko     |OcenaC|DataC     |OcenaCpp|Egzamin|timestamp |Wynik|
++-----------------+------+----------+--------+-------+----------+-----+
+|Dqhoil Dhxpluj   |3.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Bhnhgpxj Lwjmq   |4.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Wkgjnerme Djfbw  |4.0   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Sredvmuwt Tcimknl|4.5   |2016-01-20|4.5     |3.5    |1453244400|1    |
+|Tiowe Bqoilnqbrx |4.0   |2016-01-14|4.5     |3.0    |1452726000|1    |
+|Bvaysqv Wuyih    |3.5   |2016-01-14|5.0     |3.0    |1452726000|1    |
+|Jjoaxp Ktapcy    |5.0   |2016-01-20|4.0     |3.5    |1453244400|1    |
+|Mkengbtw Aainhh  |3.5   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Fbffjb Muupwshu  |4.0   |2016-01-14|5.0     |4.0    |1452726000|1    |
+|Yahwfyp Bvnlsig  |5.0   |2016-01-14|4.5     |4.0    |1452726000|1    |
++-----------------+------+----------+--------+-------+----------+-----+
+only showing top 10 rows
+
+Schemat danych po przetworzeniu:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+ |-- timestamp: long (nullable = true)
+ |-- Wynik: integer (nullable = false)
+\end{verbatim}
+
+
+\section{LogisticRegressionAnalysis - analiza działania algorytmu}
+\subsection{Budowa modelu i interpretacja współczynników}
+\begin{verbatim}
+--- Równanie regresji logistycznej ---
+logit(zdal) = 0.719097*OcenaC + -0.000000*timestamp + 0.993461*OcenaCpp + 118.340611
+
+--- Interpretacja współczynników ---
+Wzrost OcenaC o 1 zwiększa logit o 0.719097, a szanse zdania razy 2.052578 czyli o 105.257821%
+Wzrost DataC o 1 dzień zwiększa logit o -0.007379, a szanse zdania razy 0.992648 czyli o -0.735167%
+Wzrost OcenaCpp o 1 zwiększa logit o 0.993461, a szanse zdania razy 2.700564 czyli o 170.056381%
+\end{verbatim}
+
+\subsection{Predykcja i jej wyniki}
+\begin{verbatim}
+    --- Analiza predykcji dla wiersza ---
+Cechy: [3.5,1.452726E9,4.0]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 0.763965
+rawPrediction (Spark): [-0.763965, 0.763965]
+Obliczone P(Y=1): 0.682214, P(Y=0): 0.317786
+Prawdopodobieństwa (Spark): P(Y=0)=0.317786 (indeks 0), P(Y=1)=0.682214 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.682214
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [4.5,1.452726E9,4.0]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 1.483062
+rawPrediction (Spark): [-1.483062, 1.483062]
+Obliczone P(Y=1): 0.815035, P(Y=0): 0.184965
+Prawdopodobieństwa (Spark): P(Y=0)=0.184965 (indeks 0), P(Y=1)=0.815035 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.815035
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [4.0,1.4532444E9,3.0]
+Rzeczywisty wynik: 0
+Predykcja modelu: 1.0
+Obliczony logit: 0.085780
+rawPrediction (Spark): [-0.085780, 0.085780]
+Obliczone P(Y=1): 0.521432, P(Y=0): 0.478568
+Prawdopodobieństwa (Spark): P(Y=0)=0.478568 (indeks 0), P(Y=1)=0.521432 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.521432
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [4.5,1.4532444E9,4.5]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 1.935519
+rawPrediction (Spark): [-1.935519, 1.935519]
+Obliczone P(Y=1): 0.873859, P(Y=0): 0.126141
+Prawdopodobieństwa (Spark): P(Y=0)=0.126141 (indeks 0), P(Y=1)=0.873859 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.873859
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [4.0,1.452726E9,4.5]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 1.620244
+rawPrediction (Spark): [-1.620244, 1.620244]
+Obliczone P(Y=1): 0.834829, P(Y=0): 0.165171
+Prawdopodobieństwa (Spark): P(Y=0)=0.165171 (indeks 0), P(Y=1)=0.834829 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.834829
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [3.5,1.452726E9,5.0]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 1.757426
+rawPrediction (Spark): [-1.757426, 1.757426]
+Obliczone P(Y=1): 0.852887, P(Y=0): 0.147113
+Prawdopodobieństwa (Spark): P(Y=0)=0.147113 (indeks 0), P(Y=1)=0.852887 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.852887
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [5.0,1.4532444E9,4.0]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 1.798337
+rawPrediction (Spark): [-1.798337, 1.798337]
+Obliczone P(Y=1): 0.857946, P(Y=0): 0.142054
+Prawdopodobieństwa (Spark): P(Y=0)=0.142054 (indeks 0), P(Y=1)=0.857946 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.857946
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [3.5,1.4532444E9,3.0]
+Rzeczywisty wynik: 0
+Predykcja modelu: 0.0
+Obliczony logit: -0.273768
+rawPrediction (Spark): [0.273768, -0.273768]
+Obliczone P(Y=1): 0.431982, P(Y=0): 0.568018
+Prawdopodobieństwa (Spark): P(Y=0)=0.568018 (indeks 0), P(Y=1)=0.431982 (indeks 1)
+Prawdopodobieństwo dla predykcji (0): 0.568018
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [4.0,1.452726E9,5.0]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 2.116974
+rawPrediction (Spark): [-2.116974, 2.116974]
+Obliczone P(Y=1): 0.892542, P(Y=0): 0.107458
+Prawdopodobieństwa (Spark): P(Y=0)=0.107458 (indeks 0), P(Y=1)=0.892542 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.892542
+
+--- Analiza predykcji dla wiersza ---
+Cechy: [5.0,1.452726E9,4.5]
+Rzeczywisty wynik: 1
+Predykcja modelu: 1.0
+Obliczony logit: 2.339341
+rawPrediction (Spark): [-2.339341, 2.339341]
+Obliczone P(Y=1): 0.912083, P(Y=0): 0.087917
+Prawdopodobieństwa (Spark): P(Y=0)=0.087917 (indeks 0), P(Y=1)=0.912083 (indeks 1)
+Prawdopodobieństwo dla predykcji (1): 0.912083
+...
+\end{verbatim}
+
+
+\subsection{Prawdopodobieństwo wybranej etykiety}
+\begin{verbatim}
+    Schemat załadowanych danych:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+
+Dane po wstępnym przetworzeniu:
++-----------------+------+----------+--------+-------+----------+-----+
+|ImieNazwisko     |OcenaC|DataC     |OcenaCpp|Egzamin|timestamp |Wynik|
++-----------------+------+----------+--------+-------+----------+-----+
+|Dqhoil Dhxpluj   |3.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Bhnhgpxj Lwjmq   |4.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Wkgjnerme Djfbw  |4.0   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Sredvmuwt Tcimknl|4.5   |2016-01-20|4.5     |3.5    |1453244400|1    |
+|Tiowe Bqoilnqbrx |4.0   |2016-01-14|4.5     |3.0    |1452726000|1    |
+|Bvaysqv Wuyih    |3.5   |2016-01-14|5.0     |3.0    |1452726000|1    |
+|Jjoaxp Ktapcy    |5.0   |2016-01-20|4.0     |3.5    |1453244400|1    |
+|Mkengbtw Aainhh  |3.5   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Fbffjb Muupwshu  |4.0   |2016-01-14|5.0     |4.0    |1452726000|1    |
+|Yahwfyp Bvnlsig  |5.0   |2016-01-14|4.5     |4.0    |1452726000|1    |
++-----------------+------+----------+--------+-------+----------+-----+
+only showing top 10 rows
+
+Schemat danych po przetworzeniu:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+ |-- timestamp: long (nullable = true)
+ |-- Wynik: integer (nullable = false)
+
+
+--- Równanie regresji logistycznej ---
+logit(zdal) = 0.719097*OcenaC + -0.000000*timestamp + 0.993461*OcenaCpp + 118.340611
+
+--- Interpretacja współczynników ---
+Wzrost OcenaC o 1 zwiększa logit o 0.719097, a szanse zdania razy 2.052578 czyli o 105.257821%
+Wzrost DataC o 1 dzień zwiększa logit o -0.007379, a szanse zdania razy 0.992648 czyli o -0.735167%
+Wzrost OcenaCpp o 1 zwiększa logit o 0.993461, a szanse zdania razy 2.700564 czyli o 170.056381%
+
+--- Predykcje z dodaną kolumną 'prob' ---
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+|ImieNazwisko     |OcenaC|DataC     |OcenaCpp|Egzamin|timestamp |Wynik|prediction|prob              |
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+|Dqhoil Dhxpluj   |3.5   |2016-01-14|4.0     |3.0    |1452726000|1    |1.0       |0.6822140478017462|
+|Bhnhgpxj Lwjmq   |4.5   |2016-01-14|4.0     |3.0    |1452726000|1    |1.0       |0.8150346437892119|
+|Wkgjnerme Djfbw  |4.0   |2016-01-20|3.0     |2.0    |1453244400|0    |1.0       |0.5214319094648738|
+|Sredvmuwt Tcimknl|4.5   |2016-01-20|4.5     |3.5    |1453244400|1    |1.0       |0.873859074946054 |
+|Tiowe Bqoilnqbrx |4.0   |2016-01-14|4.5     |3.0    |1452726000|1    |1.0       |0.8348287816803135|
+|Bvaysqv Wuyih    |3.5   |2016-01-14|5.0     |3.0    |1452726000|1    |1.0       |0.8528869894846198|
+|Jjoaxp Ktapcy    |5.0   |2016-01-20|4.0     |3.5    |1453244400|1    |1.0       |0.8579464314270453|
+|Mkengbtw Aainhh  |3.5   |2016-01-20|3.0     |2.0    |1453244400|0    |0.0       |0.5680177413944832|
+|Fbffjb Muupwshu  |4.0   |2016-01-14|5.0     |4.0    |1452726000|1    |1.0       |0.8925420783313254|
+|Yahwfyp Bvnlsig  |5.0   |2016-01-14|4.5     |4.0    |1452726000|1    |1.0       |0.9120832314663346|
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+only showing top 10 rows
+\end{verbatim}
+
+\subsection{Argument repartition 5}
+Zmiana argumentu repartition na 5 instruuje Sparka, aby podzielił dane na 5 partycji podczas przetwarzania.
+
+
+\section{LogisticRegressionScores - ocena wyników}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Screenshot 2025-05-12 at 21.57.32.png}
+    \caption{Objective history}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Screenshot 2025-05-12 at 21.57.41.png}
+    \caption{Krzywa ROC}
+    \label{fig:enter-label}
+\end{figure}
+\begin{verbatim}
+    Schemat załadowanych danych:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+
+Dane po wstępnym przetworzeniu:
++-----------------+------+----------+--------+-------+----------+-----+
+|ImieNazwisko     |OcenaC|DataC     |OcenaCpp|Egzamin|timestamp |Wynik|
++-----------------+------+----------+--------+-------+----------+-----+
+|Dqhoil Dhxpluj   |3.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Bhnhgpxj Lwjmq   |4.5   |2016-01-14|4.0     |3.0    |1452726000|1    |
+|Wkgjnerme Djfbw  |4.0   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Sredvmuwt Tcimknl|4.5   |2016-01-20|4.5     |3.5    |1453244400|1    |
+|Tiowe Bqoilnqbrx |4.0   |2016-01-14|4.5     |3.0    |1452726000|1    |
+|Bvaysqv Wuyih    |3.5   |2016-01-14|5.0     |3.0    |1452726000|1    |
+|Jjoaxp Ktapcy    |5.0   |2016-01-20|4.0     |3.5    |1453244400|1    |
+|Mkengbtw Aainhh  |3.5   |2016-01-20|3.0     |2.0    |1453244400|0    |
+|Fbffjb Muupwshu  |4.0   |2016-01-14|5.0     |4.0    |1452726000|1    |
+|Yahwfyp Bvnlsig  |5.0   |2016-01-14|4.5     |4.0    |1452726000|1    |
++-----------------+------+----------+--------+-------+----------+-----+
+only showing top 10 rows
+
+Schemat danych po przetworzeniu:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+ |-- Egzamin: double (nullable = true)
+ |-- timestamp: long (nullable = true)
+ |-- Wynik: integer (nullable = false)
+
+
+--- Równanie regresji logistycznej ---
+logit(zdal) = 0.719097*OcenaC + -0.000000*timestamp + 0.993461*OcenaCpp + 118.340611
+
+--- Interpretacja współczynników ---
+Wzrost OcenaC o 1 zwiększa logit o 0.719097, a szanse zdania razy 2.052578 czyli o 105.257821%
+Wzrost DataC o 1 dzień zwiększa logit o -0.007379, a szanse zdania razy 0.992648 czyli o -0.735167%
+Wzrost OcenaCpp o 1 zwiększa logit o 0.993461, a szanse zdania razy 2.700564 czyli o 170.056381%
+
+--- Predykcje z dodaną kolumną 'prob' ---
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+|ImieNazwisko     |OcenaC|DataC     |OcenaCpp|Egzamin|timestamp |Wynik|prediction|prob              |
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+|Dqhoil Dhxpluj   |3.5   |2016-01-14|4.0     |3.0    |1452726000|1    |1.0       |0.6822140478017462|
+|Bhnhgpxj Lwjmq   |4.5   |2016-01-14|4.0     |3.0    |1452726000|1    |1.0       |0.8150346437892119|
+|Wkgjnerme Djfbw  |4.0   |2016-01-20|3.0     |2.0    |1453244400|0    |1.0       |0.5214319094648738|
+|Sredvmuwt Tcimknl|4.5   |2016-01-20|4.5     |3.5    |1453244400|1    |1.0       |0.873859074946054 |
+|Tiowe Bqoilnqbrx |4.0   |2016-01-14|4.5     |3.0    |1452726000|1    |1.0       |0.8348287816803135|
+|Bvaysqv Wuyih    |3.5   |2016-01-14|5.0     |3.0    |1452726000|1    |1.0       |0.8528869894846198|
+|Jjoaxp Ktapcy    |5.0   |2016-01-20|4.0     |3.5    |1453244400|1    |1.0       |0.8579464314270453|
+|Mkengbtw Aainhh  |3.5   |2016-01-20|3.0     |2.0    |1453244400|0    |0.0       |0.5680177413944832|
+|Fbffjb Muupwshu  |4.0   |2016-01-14|5.0     |4.0    |1452726000|1    |1.0       |0.8925420783313254|
+|Yahwfyp Bvnlsig  |5.0   |2016-01-14|4.5     |4.0    |1452726000|1    |1.0       |0.9120832314663346|
++-----------------+------+----------+--------+-------+----------+-----+----------+------------------+
+only showing top 10 rows
+
+
+Zapisywanie wyników do CSV...
+Wyniki zapisane w output/egzamin-with-classification.csv
+
+--- Starting Train/Test and Evaluation ---
+Training set size: 73
+Test set size: 30
+Model trained on the training set.
+
+--- Training Summary Analysis ---
+
+--- Objective History ---
+Objective history chart displayed using matplotlib4j.
+
+--- ROC Curve Table (Training Set) ---
++--------------------+--------------------+
+|                 FPR|                 TPR|
++--------------------+--------------------+
+|                 0.0|                 0.0|
+|                 0.0|0.019230769230769232|
+|                 0.0| 0.09615384615384616|
+|                 0.0| 0.15384615384615385|
+|                 0.0| 0.21153846153846154|
+|                 0.0| 0.23076923076923078|
+|                 0.0| 0.28846153846153844|
+|                 0.0|  0.3269230769230769|
+|                 0.0| 0.38461538461538464|
+|                 0.0|  0.4423076923076923|
+|                 0.0| 0.46153846153846156|
+|                 0.0|  0.4807692307692308|
+|                 0.0|                 0.5|
+|                 0.0|  0.5192307692307693|
+|                 0.0|  0.5384615384615384|
+|                 0.0|  0.5576923076923077|
+|                 0.0|  0.5769230769230769|
+|                 0.0|  0.5961538461538461|
+|                 0.0|  0.6153846153846154|
+|0.047619047619047616|  0.6346153846153846|
++--------------------+--------------------+
+only showing top 20 rows
+
+
+--- ROC Curve Data (for plotting) ---
+FPR         | TPR
+--------------------
+0.0000000000 | 0.0000000000
+0.0000000000 | 0.0192307692
+0.0000000000 | 0.0961538462
+0.0000000000 | 0.1538461538
+0.0000000000 | 0.2115384615
+0.0000000000 | 0.2307692308
+0.0000000000 | 0.2884615385
+0.0000000000 | 0.3269230769
+0.0000000000 | 0.3846153846
+0.0000000000 | 0.4423076923
+0.0000000000 | 0.4615384615
+0.0000000000 | 0.4807692308
+0.0000000000 | 0.5000000000
+0.0000000000 | 0.5192307692
+0.0000000000 | 0.5384615385
+0.0000000000 | 0.5576923077
+0.0000000000 | 0.5769230769
+0.0000000000 | 0.5961538462
+0.0000000000 | 0.6153846154
+0.0476190476 | 0.6346153846
+0.0952380952 | 0.6538461538
+0.0952380952 | 0.6923076923
+0.1904761905 | 0.7307692308
+0.1904761905 | 0.7500000000
+0.2380952381 | 0.7500000000
+0.2857142857 | 0.7500000000
+0.2857142857 | 0.7692307692
+0.2857142857 | 0.7884615385
+0.2857142857 | 0.8076923077
+0.3809523810 | 0.8076923077
+0.3809523810 | 0.8269230769
+0.3809523810 | 0.8461538462
+0.3809523810 | 0.8653846154
+0.4285714286 | 0.8846153846
+0.4285714286 | 0.9038461538
+0.4285714286 | 0.9230769231
+0.5238095238 | 0.9230769231
+0.5238095238 | 0.9423076923
+0.5714285714 | 0.9423076923
+0.5714285714 | 0.9615384615
+0.7619047619 | 0.9807692308
+0.7619047619 | 1.0000000000
+0.8095238095 | 1.0000000000
+0.8571428571 | 1.0000000000
+0.9047619048 | 1.0000000000
+0.9523809524 | 1.0000000000
+1.0000000000 | 1.0000000000
+1.0000000000 | 1.0000000000
+
+--- Performance Metrics (Training Set) ---
+Accuracy: 0.8082
+Area Under ROC (AUC): 0.8741
+Weighted FPR: 0.3897
+Weighted TPR (Recall): 0.8082
+Weighted Precision: 0.8030
+Weighted Recall: 0.8082
+Weighted F-measure (beta=1.0): 0.7925
+
+--- Threshold Selection based on F-Measure (Training Set) ---
+Max F-Measure on Training Set: 0.8807
+Corresponding Threshold: 0.530044
+Set model threshold to: 0.530044
+
+--- Evaluating on Test Set (with updated threshold) ---
+
+--- Performance Metrics (Test Set) ---
+Accuracy:          0.8333
+Weighted Precision: 0.8240
+Weighted Recall:    0.8333
+F1 Score:          0.8275
+\end{verbatim}
+
+
+\section{LogisticRegressionGrid - tworzenie tabeli ocen}
+
+\begin{verbatim}
+    Exam data preprocessed and features assembled.
+Model trained on full exam dataset.
+Optimal threshold based on F-Measure (0.9000) found: 0.532468. Set on model.
+
+--- Starting Grid Classification --- 
+Loaded grid data:
++--------------+------+----------+--------+
+|  ImieNazwisko|OcenaC|     DataC|OcenaCpp|
++--------------+------+----------+--------+
+|'Xxxxx Yyyyyy'|   3.0|2016-01-17|     2.0|
+|'Xxxxx Yyyyyy'|   3.0|2016-01-17|     3.0|
+|'Xxxxx Yyyyyy'|   3.0|2016-01-17|     3.5|
+|'Xxxxx Yyyyyy'|   3.0|2016-01-17|     4.0|
+|'Xxxxx Yyyyyy'|   3.0|2016-01-17|     4.5|
++--------------+------+----------+--------+
+only showing top 5 rows
+
+Schema inferred from grid.csv:
+root
+ |-- ImieNazwisko: string (nullable = true)
+ |-- OcenaC: double (nullable = true)
+ |-- DataC: date (nullable = true)
+ |-- OcenaCpp: double (nullable = true)
+
+Grid data preprocessed and features assembled.
+Predictions generated for grid data.
+
+--- Final Grid with Classification ---
++--------------+------+----------+--------+--------+
+|ImieNazwisko  |OcenaC|DataC     |OcenaCpp|Wynik   |
++--------------+------+----------+--------+--------+
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|2.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|3.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|3.5     |Nie zdał|
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|4.0     |Zdał    |
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|4.5     |Zdał    |
+|'Xxxxx Yyyyyy'|3.0   |2016-01-17|5.0     |Zdał    |
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|2.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|3.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|3.5     |Zdał    |
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|4.0     |Zdał    |
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|4.5     |Zdał    |
+|'Xxxxx Yyyyyy'|3.5   |2016-01-17|5.0     |Zdał    |
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|2.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|3.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|3.5     |Zdał    |
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|4.0     |Zdał    |
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|4.5     |Zdał    |
+|'Xxxxx Yyyyyy'|4.0   |2016-01-17|5.0     |Zdał    |
+|'Xxxxx Yyyyyy'|4.5   |2016-01-17|2.0     |Nie zdał|
+|'Xxxxx Yyyyyy'|4.5   |2016-01-17|3.0     |Zdał    |
++--------------+------+----------+--------+--------+
+only showing top 20 rows
+\end{verbatim}
+
+\end{document}

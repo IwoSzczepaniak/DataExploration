@@ -95,6 +95,57 @@ public class LogisticRegressionCppExam {
         System.out.printf("Wzrost OcenaCpp o 1 zwiększa logit o %.6f, a szanse zdania razy %.6f czyli o %.6f%%\n",
                 coeffOcenaCpp, oddsRatioOcenaCpp, percentageChangeOcenaCpp);
 
+        Dataset<Row> df_with_predictions = lrModel.transform(assembledDf);
+        Dataset<Row> df_predictions = df_with_predictions
+                .select("features", "rawPrediction", "probability", "prediction", "Wynik");
+
+        System.out.println("\n--- Predykcje ---");
+        df_predictions.show(10, false);
+
+        analyzePredictions(df_predictions, lrModel);
+
         spark.stop();
+    }
+
+    private static void analyzePredictions(Dataset<Row> dfPredictions, LogisticRegressionModel lrModel) {
+        org.apache.spark.ml.linalg.DenseVector coefficientsDense = (org.apache.spark.ml.linalg.DenseVector) lrModel.coefficients();
+        double intercept = lrModel.intercept();
+
+        dfPredictions.foreach(row -> {
+            Vector features = row.getAs("features");
+            Vector rawPrediction = row.getAs("rawPrediction");
+            Vector probability = row.getAs("probability");
+            double prediction = row.getAs("prediction");
+            int actualWynik = row.getAs("Wynik");
+
+            double logit = 0.0;
+            for (int i = 0; i < features.size(); i++) {
+                logit += coefficientsDense.apply(i) * features.apply(i);
+            }
+            logit += intercept;
+
+            double prob1_calculated = 1.0 / (1.0 + Math.exp(-logit));
+            double prob0_calculated = Math.exp(-logit) / (1.0 + Math.exp(-logit));
+
+
+            System.out.println("\n--- Analiza predykcji dla wiersza ---");
+            System.out.println("Cechy: " + features.toString());
+            System.out.println("Rzeczywisty wynik: " + actualWynik);
+            System.out.println("Predykcja modelu: " + prediction);
+
+            System.out.printf("Obliczony logit: %.6f\n", logit);
+            System.out.printf("rawPrediction (Spark): [%.6f, %.6f]\n", rawPrediction.apply(0), rawPrediction.apply(1));
+
+            System.out.printf("Obliczone P(Y=1): %.6f, P(Y=0): %.6f\n", prob1_calculated, prob0_calculated);
+            System.out.printf("Prawdopodobieństwa (Spark): P(Y=0)=%.6f (indeks 0), P(Y=1)=%.6f (indeks 1)\n", probability.apply(0), probability.apply(1));
+
+            double predictedLabelProbability;
+            if (prediction == 1.0) {
+                predictedLabelProbability = probability.apply(1); // P(Y=1)
+            } else {
+                predictedLabelProbability = probability.apply(0); // P(Y=0)
+            }
+            System.out.printf("Prawdopodobieństwo dla predykcji (%.0f): %.6f\n", prediction, predictedLabelProbability);
+        });
     }
 }

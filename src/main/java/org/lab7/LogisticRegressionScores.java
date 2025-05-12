@@ -3,10 +3,11 @@ package org.lab7;
 import org.apache.spark.ml.classification.LogisticRegression;
 import org.apache.spark.ml.classification.LogisticRegressionModel;
 import org.apache.spark.ml.classification.BinaryLogisticRegressionTrainingSummary;
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.functions;
 
-// matplotlib4j imports
 import com.github.sh0nk.matplotlib4j.Plot;
 import com.github.sh0nk.matplotlib4j.PythonConfig;
 import com.github.sh0nk.matplotlib4j.PythonExecutionException;
@@ -139,6 +140,39 @@ public class LogisticRegressionScores {
         System.out.printf("Weighted Precision: %.4f%n", trainingSummary.weightedPrecision());
         System.out.printf("Weighted Recall: %.4f%n", trainingSummary.weightedRecall());
         System.out.printf("Weighted F-measure (beta=1.0): %.4f%n", trainingSummary.weightedFMeasure());
+
+        System.out.println("\n--- Threshold Selection based on F-Measure (Training Set) ---");
+        Dataset<Row> df_fmeasures = trainingSummary.fMeasureByThreshold();
+
+        double maxFMeasure = df_fmeasures.select(functions.max("F-Measure")).head().getDouble(0);
+
+        double bestThreshold = df_fmeasures.where(functions.col("F-Measure").equalTo(maxFMeasure))
+                .select("threshold").head().getDouble(0);
+
+        System.out.printf("Max F-Measure on Training Set: %.4f%n", maxFMeasure);
+        System.out.printf("Corresponding Threshold: %.6f%n", bestThreshold);
+
+        lrModel.setThreshold(bestThreshold);
+        System.out.printf("Set model threshold to: %.6f%n", lrModel.getThreshold());
+
+        System.out.println("\n--- Evaluating on Test Set (with updated threshold) ---");
+
+        Dataset<Row> predictions_test = lrModel.transform(df_test);
+        
+        MulticlassClassificationEvaluator eval = new MulticlassClassificationEvaluator()
+                .setLabelCol("Wynik")
+                .setPredictionCol("prediction");
+
+        double accuracy = eval.setMetricName("accuracy").evaluate(predictions_test);
+        double weightedPrecision = eval.setMetricName("weightedPrecision").evaluate(predictions_test);
+        double weightedRecall = eval.setMetricName("weightedRecall").evaluate(predictions_test);
+        double f1 = eval.setMetricName("f1").evaluate(predictions_test);
+
+        System.out.println("\n--- Performance Metrics (Test Set) ---");
+        System.out.printf("Accuracy:          %.4f%n", accuracy);
+        System.out.printf("Weighted Precision: %.4f%n", weightedPrecision);
+        System.out.printf("Weighted Recall:    %.4f%n", weightedRecall);
+        System.out.printf("F1 Score:          %.4f%n", f1);
 
         System.out.println("\n--- Finished Train/Test and Evaluation ---");
         return lrModel;

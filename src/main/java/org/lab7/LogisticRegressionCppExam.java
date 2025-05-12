@@ -6,20 +6,41 @@ import org.apache.spark.ml.feature.VectorAssembler;
 import org.apache.spark.ml.linalg.Vector;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.types.DataTypes;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.unix_timestamp;
+import static org.apache.spark.sql.functions.callUDF;
 
 public class LogisticRegressionCppExam {
+
+    static class MaxVectorElement implements UDF1<Vector, Double> {
+        @Override
+        public Double call(Vector vector) throws Exception {
+            if (vector == null) {
+                return null;
+            }
+            return vector.apply(vector.argmax());
+        }
+    }
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
                 .appName("LogisticRegressionOnExam")
                 .master("local[*]")
                 .getOrCreate();
+
+        spark.udf().register("max_vector_element", new MaxVectorElement(), DataTypes.DoubleType);
+
+        UDF1<Vector, Double> mve_lambda = v -> {
+            if (v == null) return null;
+            return v.apply(v.argmax());
+        };
+        spark.udf().register("max_vector_element_alt", mve_lambda, DataTypes.DoubleType);
 
         String csvPath = "src/main/resources/lab7/egzamin-cpp.csv";
 
@@ -95,57 +116,25 @@ public class LogisticRegressionCppExam {
         System.out.printf("Wzrost OcenaCpp o 1 zwiększa logit o %.6f, a szanse zdania razy %.6f czyli o %.6f%%\n",
                 coeffOcenaCpp, oddsRatioOcenaCpp, percentageChangeOcenaCpp);
 
-        Dataset<Row> df_with_predictions = lrModel.transform(assembledDf);
-        Dataset<Row> df_predictions = df_with_predictions
-                .select("features", "rawPrediction", "probability", "prediction", "Wynik");
+        Dataset<Row> df_with_predictions_all_cols = lrModel.transform(assembledDf);
 
-        System.out.println("\n--- Predykcje ---");
-        df_predictions.show(10, false);
+        Dataset<Row> df_predictions_with_prob = df_with_predictions_all_cols
+                .withColumn("prob", callUDF("max_vector_element", col("probability")))
+                .drop("features", "rawPrediction", "probability");
 
-        analyzePredictions(df_predictions, lrModel);
+        System.out.println("\n--- Predykcje z dodaną kolumną 'prob' ---");
+        df_predictions_with_prob.show(10, false);
+
+        Dataset<Row> df_to_save = df_predictions_with_prob.repartition(1);
+        System.out.println("\nZapisywanie wyników do CSV...");
+        df_to_save.write()
+                .format("csv")
+                .option("header", true)
+                .option("delimiter", ",")
+                .mode(SaveMode.Overwrite)
+                .save("output/egzamin-with-classification.csv");
+        System.out.println("Wyniki zapisane w output/egzamin-with-classification.csv");
 
         spark.stop();
-    }
-
-    private static void analyzePredictions(Dataset<Row> dfPredictions, LogisticRegressionModel lrModel) {
-        org.apache.spark.ml.linalg.DenseVector coefficientsDense = (org.apache.spark.ml.linalg.DenseVector) lrModel.coefficients();
-        double intercept = lrModel.intercept();
-
-        dfPredictions.foreach(row -> {
-            Vector features = row.getAs("features");
-            Vector rawPrediction = row.getAs("rawPrediction");
-            Vector probability = row.getAs("probability");
-            double prediction = row.getAs("prediction");
-            int actualWynik = row.getAs("Wynik");
-
-            double logit = 0.0;
-            for (int i = 0; i < features.size(); i++) {
-                logit += coefficientsDense.apply(i) * features.apply(i);
-            }
-            logit += intercept;
-
-            double prob1_calculated = 1.0 / (1.0 + Math.exp(-logit));
-            double prob0_calculated = Math.exp(-logit) / (1.0 + Math.exp(-logit));
-
-
-            System.out.println("\n--- Analiza predykcji dla wiersza ---");
-            System.out.println("Cechy: " + features.toString());
-            System.out.println("Rzeczywisty wynik: " + actualWynik);
-            System.out.println("Predykcja modelu: " + prediction);
-
-            System.out.printf("Obliczony logit: %.6f\n", logit);
-            System.out.printf("rawPrediction (Spark): [%.6f, %.6f]\n", rawPrediction.apply(0), rawPrediction.apply(1));
-
-            System.out.printf("Obliczone P(Y=1): %.6f, P(Y=0): %.6f\n", prob1_calculated, prob0_calculated);
-            System.out.printf("Prawdopodobieństwa (Spark): P(Y=0)=%.6f (indeks 0), P(Y=1)=%.6f (indeks 1)\n", probability.apply(0), probability.apply(1));
-
-            double predictedLabelProbability;
-            if (prediction == 1.0) {
-                predictedLabelProbability = probability.apply(1); // P(Y=1)
-            } else {
-                predictedLabelProbability = probability.apply(0); // P(Y=0)
-            }
-            System.out.printf("Prawdopodobieństwo dla predykcji (%.0f): %.6f\n", prediction, predictedLabelProbability);
-        });
     }
 }
